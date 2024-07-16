@@ -15,7 +15,7 @@ public abstract class FSM_ScreensManager<EScreen>: MonoBehaviour where EScreen :
 
     [Header("Screen Assets Section")]
     [SerializeField]
-    List<ScreenAssetsGroup<EScreen>> _screenAssetsList = new List<ScreenAssetsGroup<EScreen>>();
+    List<ScreenDefinition<EScreen>> _screenAssetsList = new List<ScreenDefinition<EScreen>>();
 
 	protected bool _transitioning = false;
 

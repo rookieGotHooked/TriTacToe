@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
-public class ScreenAssetsGroup<EScreen>
+public class ScreenDefinition<EScreen>
 	where EScreen : Enum
 {
 	[SerializeField] private string _screenName;
@@ -24,8 +24,8 @@ public class ScreenAssetsGroup<EScreen>
 public class ScreenConfigs
 {
 	[SerializeField]
-	private TweenType _screenTweenType;
-	public TweenType ScreenTweenType { get => _screenTweenType; }
+	private TweenFormulas _screenTweenType;
+	public TweenFormulas ScreenTweenType { get => _screenTweenType; }
 
 	[SerializeField]
 	private float _screenTweenDuration;

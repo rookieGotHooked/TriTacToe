@@ -13,11 +13,11 @@ public abstract class BaseScreen<EScreen>: IState
 	protected GameObject _screenObject;
 	public GameObject ScreenObject { get => _screenObject; }
 	protected RectTransform _screenCanvasRectTransform;
-	protected LinearTransformTween _screenTransitionTween;
+	protected Tweens2D _screenTransitionTween;
 	protected bool _isInit = false;
 	protected AssetsGroup<EScreen> _assetsGroup;
 
-	protected const TweenType _tweenType = TweenType.EaseOutQuint;
+	protected const TweenFormulas _tweenType = TweenFormulas.EaseOutQuint;
 
 	protected float _transitionTime = 0.5f;
 
@@ -48,7 +48,7 @@ public abstract class BaseScreen<EScreen>: IState
 	{
 		_screenObject = assetsGroup.ScreenObject;
 		_screenCanvasRectTransform = _screenObject.GetComponent<RectTransform>();
-		_screenTransitionTween = _screenObject.GetComponent<LinearTransformTween>();
+		_screenTransitionTween = _screenObject.GetComponent<Tweens2D>();
 
 		_assetsGroup = assetsGroup;
 	}
@@ -101,12 +101,11 @@ public abstract class BaseScreen<EScreen>: IState
 	{
 		if (_screenTransitionTween == null)
 		{
-			Debug.Log($"Curent GameObject: {_screenObject}");
-			_screenTransitionTween = _screenObject.GetComponent<LinearTransformTween>();
+			_screenTransitionTween = _screenObject.GetComponent<Tweens2D>();
 
 			if (_screenTransitionTween == null)
 			{
-				throw new Exception("Cannot find LinearTransformTween component within the game object.");
+				throw new Exception("Cannot find Tweens2D component within the game object.");
 			}
 			else
 			{
@@ -132,11 +131,11 @@ public abstract class BaseScreen<EScreen>: IState
 	{
 		if (_screenTransitionTween == null)
 		{
-			_screenTransitionTween = _screenObject.GetComponent<LinearTransformTween>();
+			_screenTransitionTween = _screenObject.GetComponent<Tweens2D>();
 
 			if (_screenTransitionTween == null)
 			{
-				throw new Exception("Cannot find LinearTransformTween component within the game object.");
+				throw new Exception("Cannot find Tweens2D component within the game object.");
 			}
 			else
 			{
@@ -163,15 +162,14 @@ public abstract class BaseScreen<EScreen>: IState
 	{
 		if (_screenTransitionTween == null)
 		{
-			_screenTransitionTween = _screenObject.GetComponent<LinearTransformTween>();
+			_screenTransitionTween = _screenObject.GetComponent<Tweens2D>();
 
 			if (_screenTransitionTween == null)
 			{
-				throw new Exception("Cannot find LinearTransformTween component within the game object.");
+				throw new Exception("Cannot find Tweens2D component within the game object.");
 			}
 			else
 			{
-				//Debug.Log(_screenObject);
 				RectTransform currentRectTransform = _screenObject.GetComponent<RectTransform>();
 				await _screenTransitionTween.TweenPosition(
 					currentRectTransform.anchoredPosition, 
@@ -195,11 +193,11 @@ public abstract class BaseScreen<EScreen>: IState
 	{
 		if (_screenTransitionTween == null)
 		{
-			_screenTransitionTween = _screenObject.GetComponent<LinearTransformTween>();
+			_screenTransitionTween = _screenObject.GetComponent<Tweens2D>();
 
 			if (_screenTransitionTween == null)
 			{
-				throw new Exception("Cannot find LinearTransformTween component within the game object.");
+				throw new Exception("Cannot find Tweens2D component within the game object.");
 			}
 			else
 			{

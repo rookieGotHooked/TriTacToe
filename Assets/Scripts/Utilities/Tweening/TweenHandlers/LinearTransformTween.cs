@@ -1,9 +1,5 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Threading.Tasks;
-using UnityEditor;
 using UnityEngine;
 
 public class LinearTransformTween: MonoBehaviour 
@@ -113,7 +109,7 @@ public class LinearTransformTween: MonoBehaviour
 		}
 	}
 
-	async public Task TweenPosition(Vector2 currentPosition, Vector2 targetPosition, TweenType tweenType, float duration)
+	async public Task TweenPosition(Vector2 currentPosition, Vector2 targetPosition, TweenFormulas TweenFormulas, float duration)
 	{
 		float elapsedTime = 0f;
 
@@ -125,7 +121,7 @@ public class LinearTransformTween: MonoBehaviour
 		while (elapsedTime < duration)
 		{
 
-			float tweenValue = TweenMapping(_tweenPositionDelegate, tweenType, elapsedTime / duration);
+			float tweenValue = TweenMapping(_tweenPositionDelegate, TweenFormulas, elapsedTime / duration);
 			Vector2 newPosition = currentPosition + (targetPosition - currentPosition) * tweenValue;
 
 			if (_rectTransform)
@@ -222,7 +218,7 @@ public class LinearTransformTween: MonoBehaviour
 		}
 	}
 
-	async public Task TweenCustomSize(Vector2 currentSize, Vector2 targetSize, TweenType tweenType, float duration)
+	async public Task TweenCustomSize(Vector2 currentSize, Vector2 targetSize, TweenFormulas TweenFormulas, float duration)
 	{
 		if (!_rectTransform)
 		{
@@ -239,7 +235,7 @@ public class LinearTransformTween: MonoBehaviour
 
 			while (elapsedTime < duration)
 			{
-				float tweenValue = TweenMapping(_tweenCustomSizeDelegate, tweenType, elapsedTime / _customSizeTween.Duration);
+				float tweenValue = TweenMapping(_tweenCustomSizeDelegate, TweenFormulas, elapsedTime / _customSizeTween.Duration);
 				Vector2 newCustomSize = currentSize + (targetSize - currentSize) * tweenValue;
 
 				_rectTransform.sizeDelta = newCustomSize;
@@ -361,102 +357,102 @@ public class LinearTransformTween: MonoBehaviour
 		}
 	}
 
-	private float TweenMapping(DelegatedFloat delegatedFloat, TweenType selectedTweenType, float value)
+	private float TweenMapping(DelegatedFloat delegatedFloat, TweenFormulas selectedTweenType, float value)
 	{
 		switch (selectedTweenType)
 		{
-			case TweenType.EaseInSine:
-				delegatedFloat = TweenFomulas.EaseInSine;
+			case TweenFormulas.EaseInSine:
+				delegatedFloat = TweenMethods.EaseInSine;
 				return delegatedFloat(value);
-			case TweenType.EaseOutSine:
-				delegatedFloat = TweenFomulas.EaseOutSine;
+			case TweenFormulas.EaseOutSine:
+				delegatedFloat = TweenMethods.EaseOutSine;
 				return delegatedFloat(value);
-			case TweenType.EaseInOutSine:
-				delegatedFloat = TweenFomulas.EaseInOutSine;
+			case TweenFormulas.EaseInOutSine:
+				delegatedFloat = TweenMethods.EaseInOutSine;
 				return delegatedFloat(value);
-			case TweenType.EaseInQuad:
-				delegatedFloat = TweenFomulas.EaseInQuad;
+			case TweenFormulas.EaseInQuad:
+				delegatedFloat = TweenMethods.EaseInQuad;
 				return delegatedFloat(value);
-			case TweenType.EaseOutQuad:
-				delegatedFloat = TweenFomulas.EaseOutQuad;
+			case TweenFormulas.EaseOutQuad:
+				delegatedFloat = TweenMethods.EaseOutQuad;
 				return delegatedFloat(value);
-			case TweenType.EaseInOutQuad:
-				delegatedFloat = TweenFomulas.EaseInOutQuad;
+			case TweenFormulas.EaseInOutQuad:
+				delegatedFloat = TweenMethods.EaseInOutQuad;
 				return delegatedFloat(value);
-			case TweenType.EaseInCubic:
-				delegatedFloat = TweenFomulas.EaseInCubic;
+			case TweenFormulas.EaseInCubic:
+				delegatedFloat = TweenMethods.EaseInCubic;
 				return delegatedFloat(value);
-			case TweenType.EaseOutCubic:
-				delegatedFloat = TweenFomulas.EaseOutCubic;
+			case TweenFormulas.EaseOutCubic:
+				delegatedFloat = TweenMethods.EaseOutCubic;
 				return delegatedFloat(value);
-			case TweenType.EaseInOutCubic:
-				delegatedFloat = TweenFomulas.EaseInOutCubic;
+			case TweenFormulas.EaseInOutCubic:
+				delegatedFloat = TweenMethods.EaseInOutCubic;
 				return delegatedFloat(value);
-			case TweenType.EaseInQuart:
-				delegatedFloat = TweenFomulas.EaseInQuart;
+			case TweenFormulas.EaseInQuart:
+				delegatedFloat = TweenMethods.EaseInQuart;
 				return delegatedFloat(value);
-			case TweenType.EaseOutQuart:
-				delegatedFloat = TweenFomulas.EaseOutQuart;
+			case TweenFormulas.EaseOutQuart:
+				delegatedFloat = TweenMethods.EaseOutQuart;
 				return delegatedFloat(value);
-			case TweenType.EaseInOutQuart:
-				delegatedFloat = TweenFomulas.EaseInOutQuart;
+			case TweenFormulas.EaseInOutQuart:
+				delegatedFloat = TweenMethods.EaseInOutQuart;
 				return delegatedFloat(value);
-			case TweenType.EaseInQuint:
-				delegatedFloat = TweenFomulas.EaseInQuint;
+			case TweenFormulas.EaseInQuint:
+				delegatedFloat = TweenMethods.EaseInQuint;
 				return delegatedFloat(value);
-			case TweenType.EaseOutQuint:
-				delegatedFloat = TweenFomulas.EaseOutQuint;
+			case TweenFormulas.EaseOutQuint:
+				delegatedFloat = TweenMethods.EaseOutQuint;
 				return delegatedFloat(value);
-			case TweenType.EaseInOutQuint:
-				delegatedFloat = TweenFomulas.EaseInOutQuint;
+			case TweenFormulas.EaseInOutQuint:
+				delegatedFloat = TweenMethods.EaseInOutQuint;
 				return delegatedFloat(value);
-			case TweenType.EaseInExpo:
-				delegatedFloat = TweenFomulas.EaseInExpo;
+			case TweenFormulas.EaseInExpo:
+				delegatedFloat = TweenMethods.EaseInExpo;
 				return delegatedFloat(value);
-			case TweenType.EaseOutExpo:
-				delegatedFloat = TweenFomulas.EaseOutExpo;
+			case TweenFormulas.EaseOutExpo:
+				delegatedFloat = TweenMethods.EaseOutExpo;
 				return delegatedFloat(value);
-			case TweenType.EaseInOutExpo:
-				delegatedFloat = TweenFomulas.EaseInOutExpo;
+			case TweenFormulas.EaseInOutExpo:
+				delegatedFloat = TweenMethods.EaseInOutExpo;
 				return delegatedFloat(value);
-			case TweenType.EaseInCirc:
-				delegatedFloat = TweenFomulas.EaseInCirc;
+			case TweenFormulas.EaseInCirc:
+				delegatedFloat = TweenMethods.EaseInCirc;
 				return delegatedFloat(value);
-			case TweenType.EaseOutCirc:
-				delegatedFloat = TweenFomulas.EaseOutCirc;
+			case TweenFormulas.EaseOutCirc:
+				delegatedFloat = TweenMethods.EaseOutCirc;
 				return delegatedFloat(value);
-			case TweenType.EaseInOutCirc:
-				delegatedFloat = TweenFomulas.EaseInOutCirc;
+			case TweenFormulas.EaseInOutCirc:
+				delegatedFloat = TweenMethods.EaseInOutCirc;
 				return delegatedFloat(value);
-			case TweenType.EaseInBack:
-				delegatedFloat = TweenFomulas.EaseInBack;
+			case TweenFormulas.EaseInBack:
+				delegatedFloat = TweenMethods.EaseInBack;
 				return delegatedFloat(value);
-			case TweenType.EaseOutBack:
-				delegatedFloat = TweenFomulas.EaseOutBack;
+			case TweenFormulas.EaseOutBack:
+				delegatedFloat = TweenMethods.EaseOutBack;
 				return delegatedFloat(value);
-			case TweenType.EaseInOutBack:
-				delegatedFloat = TweenFomulas.EaseInOutBack;
+			case TweenFormulas.EaseInOutBack:
+				delegatedFloat = TweenMethods.EaseInOutBack;
 				return delegatedFloat(value);
-			case TweenType.EaseInElastic:
-				delegatedFloat = TweenFomulas.EaseInElastic;
+			case TweenFormulas.EaseInElastic:
+				delegatedFloat = TweenMethods.EaseInElastic;
 				return delegatedFloat(value);
-			case TweenType.EaseOutElastic:
-				delegatedFloat = TweenFomulas.EaseOutElastic;
+			case TweenFormulas.EaseOutElastic:
+				delegatedFloat = TweenMethods.EaseOutElastic;
 				return delegatedFloat(value);
-			case TweenType.EaseInOutElastic:
-				delegatedFloat = TweenFomulas.EaseInOutElastic;
+			case TweenFormulas.EaseInOutElastic:
+				delegatedFloat = TweenMethods.EaseInOutElastic;
 				return delegatedFloat(value);
-			case TweenType.EaseInBounce:
-				delegatedFloat = TweenFomulas.EaseInBounce;
+			case TweenFormulas.EaseInBounce:
+				delegatedFloat = TweenMethods.EaseInBounce;
 				return delegatedFloat(value);
-			case TweenType.EaseOutBounce:
-				delegatedFloat = TweenFomulas.EaseOutBounce;
+			case TweenFormulas.EaseOutBounce:
+				delegatedFloat = TweenMethods.EaseOutBounce;
 				return delegatedFloat(value);
-			case TweenType.EaseInOutBounce:
-				delegatedFloat = TweenFomulas.EaseInOutBounce;
+			case TweenFormulas.EaseInOutBounce:
+				delegatedFloat = TweenMethods.EaseInOutBounce;
 				return delegatedFloat(value);
 			default:
-				throw new Exception($"Unexpected TweenType detected: {selectedTweenType}");
+				throw new Exception($"Unexpected TweenFormulas detected: {selectedTweenType}");
 		}
 	}
 }
@@ -470,8 +466,8 @@ public class PositionTween
 	[SerializeField] bool _isUse = false;
 	public bool IsUse { get => _isUse; }
 
-	[SerializeField] TweenType _tweenFormula;
-	public TweenType TweenFormula { get => _tweenFormula; }
+	[SerializeField] TweenFormulas _tweenFormula;
+	public TweenFormulas TweenFormula { get => _tweenFormula; }
 
 	[SerializeField] Vector2 _target;
 	public Vector2 Target { get => _target; }
@@ -489,8 +485,8 @@ public class CustomSizeTween
 	[SerializeField] bool _isUse = false;
 	public bool IsUse { get => _isUse; }
 
-	[SerializeField] TweenType _tweenFormula;
-	public TweenType TweenFormula { get => _tweenFormula; }
+	[SerializeField] TweenFormulas _tweenFormula;
+	public TweenFormulas TweenFormula { get => _tweenFormula; }
 
 	[SerializeField] Vector2 _target;
 	public Vector2 Target { get => _target; }
@@ -508,8 +504,8 @@ public class ScaleTween
 	[SerializeField] bool _isUse = false;
 	public bool IsUse { get => _isUse; }
 
-	[SerializeField] TweenType _tweenFormula;
-	public TweenType TweenFormula { get => _tweenFormula; }
+	[SerializeField] TweenFormulas _tweenFormula;
+	public TweenFormulas TweenFormula { get => _tweenFormula; }
 
 	[SerializeField] Vector2 _target;
 	public Vector2 Target { get => _target; }
