@@ -3,39 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
-public class ScreenDefinition<EScreen>
-	where EScreen : Enum
+[CreateAssetMenu(fileName = "New Screen Definition", menuName = "Scriptable Object/Screen Definition")]
+public class ScreenDefinition<EScreen>: ScriptableObject where EScreen : Enum
 {
-	[SerializeField] private string _screenName;
+	[SerializeField] 
+	private string _screenName;
 
 	[SerializeField]
 	private EScreen _screenEnum;
 	public EScreen ScreenEnum { get => _screenEnum; }
 
-	[SerializeField] private ScreenConfigs _screenConfigs;
-	public ScreenConfigs ScreenConfigs { get => _screenConfigs; }
-
-	[SerializeField]
-	private AssetsGroup<EScreen> _assetsGroup = new AssetsGroup<EScreen>();
-	public AssetsGroup<EScreen> AssetsGroup { get => _assetsGroup; }
-}
-
-[Serializable]
-public class ScreenConfigs
-{
-	[SerializeField]
-	private TweenFormulas _screenTweenType;
-	public TweenFormulas ScreenTweenType { get => _screenTweenType; }
-
-	[SerializeField]
-	private float _screenTweenDuration;
-	public float ScreenTweenDuration { get => _screenTweenDuration; }
-}
-
-[Serializable]
-public class AssetsGroup<EScreen>
-	where EScreen : Enum
-{
 	[SerializeField]
 	private GameObject _screenObject;
 	public GameObject ScreenObject { get => _screenObject; set => _screenObject = value; }

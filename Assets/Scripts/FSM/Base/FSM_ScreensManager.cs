@@ -6,12 +6,34 @@ using UnityEngine.UI;
 
 public abstract class FSM_ScreensManager<EScreen>: MonoBehaviour where EScreen : Enum
 {
+    protected FSM_ScreensManager<EScreen> _instance;
+    public FSM_ScreensManager<EScreen> Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = FindAnyObjectByType<FSM_ScreensManager<EScreen>>();
+
+                if (_instance == null)
+                {
+                    GameObject tempObj = new GameObject("ScreenManager");
+                    tempObj.AddComponent<FSM_ScreensManager<EScreen>>();
+                }
+            }
+
+            return _instance;
+        }
+    }
+
 	protected BaseScreen<EScreen> _currentScreen;
 	protected EScreen _nextScreen;
 	protected Dictionary<EScreen, BaseScreen<EScreen>> _screenDict = new Dictionary<EScreen, BaseScreen<EScreen>>();
-    protected Dictionary<EScreen, AssetsGroup<EScreen>> _assetsDict = new Dictionary<EScreen, AssetsGroup<EScreen>>();
+    protected Dictionary<EScreen, ScreenDefinition<EScreen>> _screenDefinitionDict = new Dictionary<EScreen, ScreenDefinition<EScreen>>();
+    protected List<BaseScreen<EScreen>> _screensList;
 
-    [SerializeField] protected RectTransform _canvasGroup;
+    [SerializeField] 
+    protected RectTransform _canvasGroup;
 
     [Header("Screen Assets Section")]
     [SerializeField]
@@ -19,20 +41,26 @@ public abstract class FSM_ScreensManager<EScreen>: MonoBehaviour where EScreen :
 
 	protected bool _transitioning = false;
 
-    protected virtual void Start()
+	protected virtual void Awake()
+	{
+        PopuplateAssetDict();
+        AddScreens();
+	}
+
+	protected virtual void Start()
     {
         _currentScreen.OnEnter();
     }
 
     protected virtual void Update()
     {
-        if (!_transitioning && _currentScreen.NextScreen.Equals(_currentScreen.ScreenKey))
+        if (!_transitioning && _currentScreen.Equals(_currentScreen.ScreenKey))
 		{
 			_currentScreen.OnUpdate();
 		}
         else if (!_transitioning)
         {
-            ChangeScreen(_currentScreen.NextScreen);
+            ChangeScreen(_nextScreen);
         }
     }
 
@@ -45,16 +73,41 @@ public abstract class FSM_ScreensManager<EScreen>: MonoBehaviour where EScreen :
         _transitioning = false;
     }
 
-	protected virtual bool AddScreen(EScreen eScreen, BaseScreen<EScreen> screen)
-	{
-		return _screenDict.TryAdd(eScreen, screen);
-	}
+    protected virtual void AddScreens()
+    {
+        if (_screensList != null)
+        {
+            foreach (var screen in _screensList)
+            {
+                if (!_screenDict.TryAdd(screen.ScreenKey, screen))
+                {
+                    throw new Exception("Unexpected error encountered when adding item to screen dictionary");
+                }
+            }
+        }
+        else
+        {
+            throw new Exception("List of screens is currently null");
+        }
+    }
+
+    protected virtual void SetNextScreen(EScreen eScreen)
+    {
+        if (_screenDict.ContainsKey(eScreen))
+		{
+			_nextScreen = eScreen;
+		}
+        else
+        {
+            throw new Exception($"Unexpected value: Undefined screen detected - {eScreen}");
+        }
+    }
 
     protected virtual void PopuplateAssetDict()
     {
         foreach (var item in _screenAssetsList)
         {
-            bool result = _assetsDict.TryAdd(item.ScreenEnum, item.AssetsGroup);
+            bool result = _screenDefinitionDict.TryAdd(item.ScreenEnum, item);
 
             if (!result)
             {

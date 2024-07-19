@@ -1,33 +1,45 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
+using static System.TimeZoneInfo;
 
 public abstract class BaseScreen<EScreen>: IState 
 	where EScreen: Enum
 {
 	#region Variables and Constructor
 	protected bool _clicked = false;
+
 	protected GameObject _screenObject;
 	public GameObject ScreenObject { get => _screenObject; }
+
 	protected RectTransform _screenCanvasRectTransform;
 	protected Tweens2D _screenTransitionTween;
+	protected ScreenDefinition<EScreen> _screenDefinition;
+
 	protected bool _isInit = false;
-	protected AssetsGroup<EScreen> _assetsGroup;
-
-	protected const TweenFormulas _tweenType = TweenFormulas.EaseOutQuint;
-
-	protected float _transitionTime = 0.5f;
 
 	public EScreen ScreenKey { get; protected set; }
-	protected BaseScreen(EScreen screenKey)
+
+	public BaseScreen(ScreenDefinition<EScreen> screenDefinition)
 	{
-		ScreenKey = screenKey;
+		if (screenDefinition != null)
+		{
+			ScreenKey = screenDefinition.ScreenEnum;
+
+			_screenObject = screenDefinition.ScreenObject;
+			_screenDefinition = screenDefinition;
+			_screenCanvasRectTransform = _screenObject.GetComponent<RectTransform>();
+			_screenTransitionTween = _screenObject.GetComponent<Tweens2D>();
+		}
+		else
+		{
+			throw new Exception($"{ GetType().Name } assets is null.");
+		}
 	}
-	protected EScreen _nextScreen;
-	public EScreen NextScreen { get => _nextScreen; }
 
 	protected List<GameObject> _buttonsGameObject = new List<GameObject>();
 	protected List<GameObject> _staticSpritesGameObject = new List<GameObject>();
@@ -44,18 +56,9 @@ public abstract class BaseScreen<EScreen>: IState
 
 	#region Helper virtual functions
 
-	public virtual void AssignAssets(AssetsGroup<EScreen> assetsGroup)
-	{
-		_screenObject = assetsGroup.ScreenObject;
-		_screenCanvasRectTransform = _screenObject.GetComponent<RectTransform>();
-		_screenTransitionTween = _screenObject.GetComponent<Tweens2D>();
-
-		_assetsGroup = assetsGroup;
-	}
-
 	async virtual public Task InstantiateObjects()
 	{
-		foreach (var group in _assetsGroup.ObjectGroupsList)
+		foreach (var group in _screenDefinition.ObjectGroupsList)
 		{
 			List<Task> transitionTask = new List<Task>();
 
@@ -97,126 +100,84 @@ public abstract class BaseScreen<EScreen>: IState
 		}
 	}
 
-	async public virtual Task MoveLeft()
+	async public virtual Task MoveLeft(TweenFormulas tweenFormula, float transitionTime)
 	{
+		RectTransform currentRectTransform = _screenObject.GetComponent<RectTransform>();
+
 		if (_screenTransitionTween == null)
 		{
 			_screenTransitionTween = _screenObject.GetComponent<Tweens2D>();
 
 			if (_screenTransitionTween == null)
 			{
-				throw new Exception("Cannot find Tweens2D component within the game object.");
-			}
-			else
-			{
-				RectTransform currentRectTransform = _screenObject.GetComponent<RectTransform>();
-				await _screenTransitionTween.TweenPosition(
-					currentRectTransform.anchoredPosition, 
-					new Vector2(currentRectTransform.anchoredPosition.x - 1080f, currentRectTransform.anchoredPosition.y),
-					_tweenType,
-					_transitionTime);
+				_screenTransitionTween = _screenObject.AddComponent<Tweens2D>();
+
 			}
 		}
-		else
-		{
-			RectTransform currentRectTransform = _screenObject.GetComponent<RectTransform>();
-			await _screenTransitionTween.TweenPosition(
-				currentRectTransform.anchoredPosition, 
-				new Vector2(currentRectTransform.anchoredPosition.x - 1080f, currentRectTransform.anchoredPosition.y),
-				_tweenType, 
-				_transitionTime);
-		}
+
+		await _screenTransitionTween.TweenPosition(
+			currentRectTransform.anchoredPosition, 
+			new Vector2(currentRectTransform.anchoredPosition.x - 1080f, currentRectTransform.anchoredPosition.y),
+			tweenFormula,
+			transitionTime);
 	}
-	async public virtual Task MoveRight()
+	async public virtual Task MoveRight(TweenFormulas tweenFormula, float transitionTime)
 	{
+		RectTransform currentRectTransform = _screenObject.GetComponent<RectTransform>();
+
 		if (_screenTransitionTween == null)
 		{
 			_screenTransitionTween = _screenObject.GetComponent<Tweens2D>();
 
 			if (_screenTransitionTween == null)
 			{
-				throw new Exception("Cannot find Tweens2D component within the game object.");
-			}
-			else
-			{
-				RectTransform currentRectTransform = _screenObject.GetComponent<RectTransform>();
-				await _screenTransitionTween.TweenPosition(
-					currentRectTransform.anchoredPosition, 
-					new Vector2(currentRectTransform.anchoredPosition.x + 1080f, currentRectTransform.anchoredPosition.y),
-					_tweenType,
-					_transitionTime);
+				_screenTransitionTween = _screenObject.AddComponent<Tweens2D>();
 			}
 		}
-		else
-		{
-			RectTransform currentRectTransform = _screenObject.GetComponent<RectTransform>();
-			await _screenTransitionTween.TweenPosition(
-				currentRectTransform.anchoredPosition, 
-				new Vector2(currentRectTransform.anchoredPosition.x + 1080f, currentRectTransform.anchoredPosition.y), 
-				_tweenType,
-				_transitionTime);
-		}
+
+		await _screenTransitionTween.TweenPosition(
+			currentRectTransform.anchoredPosition, 
+			new Vector2(currentRectTransform.anchoredPosition.x + 1080f, currentRectTransform.anchoredPosition.y),
+			tweenFormula, transitionTime);
 	}
 
-	async public virtual Task MoveUp()
+	async public virtual Task MoveUp(TweenFormulas tweenFormula, float transitionTime)
 	{
+		RectTransform currentRectTransform = _screenObject.GetComponent<RectTransform>();
+
 		if (_screenTransitionTween == null)
 		{
 			_screenTransitionTween = _screenObject.GetComponent<Tweens2D>();
 
 			if (_screenTransitionTween == null)
 			{
-				throw new Exception("Cannot find Tweens2D component within the game object.");
-			}
-			else
-			{
-				RectTransform currentRectTransform = _screenObject.GetComponent<RectTransform>();
-				await _screenTransitionTween.TweenPosition(
-					currentRectTransform.anchoredPosition, 
-					new Vector2(currentRectTransform.anchoredPosition.x, currentRectTransform.anchoredPosition.y + 1920f),
-					_tweenType,
-					_transitionTime);
+				_screenTransitionTween = _screenObject.AddComponent<Tweens2D>();
 			}
 		}
-		else
-		{
-			RectTransform currentRectTransform = _screenObject.GetComponent<RectTransform>();
-			await _screenTransitionTween.TweenPosition(
-				currentRectTransform.anchoredPosition, 
-				new Vector2(currentRectTransform.anchoredPosition.x, currentRectTransform.anchoredPosition.y + 1920f), 
-				_tweenType,
-				_transitionTime);
-		}
+
+		await _screenTransitionTween.TweenPosition(
+			currentRectTransform.anchoredPosition, 
+			new Vector2(currentRectTransform.anchoredPosition.x, currentRectTransform.anchoredPosition.y + 1920f),
+			tweenFormula, transitionTime);
 	}
 
-	async public virtual Task MoveDown()
+	async public virtual Task MoveDown(TweenFormulas tweenFormula, float transitionTime)
 	{
+		RectTransform currentRectTransform = _screenObject.GetComponent<RectTransform>();
+
 		if (_screenTransitionTween == null)
 		{
 			_screenTransitionTween = _screenObject.GetComponent<Tweens2D>();
 
 			if (_screenTransitionTween == null)
 			{
-				throw new Exception("Cannot find Tweens2D component within the game object.");
+				_screenTransitionTween = _screenObject.AddComponent<Tweens2D>();
 			}
-			else
-			{
-				RectTransform currentRectTransform = _screenObject.GetComponent<RectTransform>();
-				await _screenTransitionTween.TweenPosition(
-					currentRectTransform.anchoredPosition, 
-					new Vector2(currentRectTransform.anchoredPosition.x, currentRectTransform.anchoredPosition.y - 1920f), 
-					_tweenType,
-					_transitionTime);
-			}
-		}
-		else
-		{
-			RectTransform currentRectTransform = _screenObject.GetComponent<RectTransform>();
+
 			await _screenTransitionTween.TweenPosition(
 				currentRectTransform.anchoredPosition, 
-				new Vector2(currentRectTransform.anchoredPosition.x, currentRectTransform.anchoredPosition.y - 1920f), 
-				_tweenType, 
-				_transitionTime);
+				new Vector2(currentRectTransform.anchoredPosition.x, currentRectTransform.anchoredPosition.y - 1920f),
+				tweenFormula, transitionTime);
 		}
 	}
 	#endregion

@@ -2,17 +2,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ScreenManager
+public class ScreenManager: FSM_ScreensManager<ScreensEnum>
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+	protected override void Awake()
+	{
+		PopuplateAssetDict();
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+		_screensList = new List<BaseScreen<ScreensEnum>>() 
+		{ 
+			new MainMenuScreen(_screenDefinitionDict[ScreensEnum.MainMenu]),
+			// new MainMenuSettingsScreen(_screenDefinitionDict[ScreensEnum.MainMenuSettings]),
+			// new MainMenuGuideScreen(_screenDefinitionDict[ScreensEnum.MainMenuGuide]),
+
+			// new GameplayScreen(_screenDefinitionDict[ScreensEnum.Gameplay]),
+			// new GameplaySettingsScreen(_screenDefinitionDict[ScreensEnum.GameplaySettings]),
+			// new GameplayGuideScreen(_screenDefinitionDict[ScreensEnum.GameplayGuide]),
+		};
+
+		AddScreens();
+	}
 }

@@ -209,13 +209,92 @@ public class Tweens2D : MonoBehaviour
 				switch (subItem.tweenTypes) 
 				{
 					case TweenTypes.Position:
-						tweenTask.Add(TweenPosition(subItem.initialValue, subItem.finalValue, subItem.tweenFormula, subItem.duration));
+
+						Vector2 currentPosition, finalPosition;
+
+						if (subItem is DirectionalMovement)
+						{
+							if (_useAnchoredPosition)
+							{
+								currentPosition = _rectTransform.anchoredPosition;
+							}
+							else
+							{
+								currentPosition = _rectTransform.position;
+							}
+
+							DirectionalMovement temp = (DirectionalMovement)subItem;
+
+							switch (temp.direction)
+							{
+								case MovementDirection.MoveLeft:
+									finalPosition = new Vector2(currentPosition.x - temp.movementValue, currentPosition.y);
+									break;
+								case MovementDirection.MoveRight:
+									finalPosition = new Vector2(currentPosition.x + temp.movementValue, currentPosition.y);
+									break;
+								case MovementDirection.MoveUp:
+									finalPosition = new Vector2(currentPosition.x, currentPosition.y + temp.movementValue);
+									break;
+								case MovementDirection.MoveDown:
+									finalPosition = new Vector2(currentPosition.x, currentPosition.y - temp.movementValue);
+									break;
+								default:
+									throw new Exception($"Unexpected value detected: {temp.direction}. Expected values are: MoveLeft, MoveRight, MoveUp, MoveDown");
+							}
+						}
+						else if (subItem is AbsoluteTween)
+						{
+							AbsoluteTween temp = (AbsoluteTween)subItem;
+
+							currentPosition = temp.finalValue;
+							finalPosition = temp.finalValue;
+						}
+						else
+						{
+							throw new Exception($"Unexpected movement type detected: {subItem.GetType()}. Expected values are: DirectionalMovement, PositionalMovement");
+						}
+						tweenTask.Add(TweenPosition(currentPosition, finalPosition, subItem.tweenFormula, subItem.duration));
+
 						break;
+
 					case TweenTypes.Scale:
-						tweenTask.Add(TweenCustomSize(subItem.initialValue, subItem.finalValue, subItem.tweenFormula, subItem.duration));
+						
+						Vector2 currentScale, finalScale;
+
+						if (subItem is AbsoluteTween)
+						{
+							AbsoluteTween temp = (AbsoluteTween)subItem;
+
+							currentScale = _rectTransform.localScale;
+							finalScale = temp.finalValue;
+						}
+						else
+						{
+							throw new Exception($"Unexpected tweening type detected: {subItem.GetType()}. Expected value(s) are: AbsoluteTween");
+						}
+
+						tweenTask.Add(TweenCustomSize(currentScale, finalScale, subItem.tweenFormula, subItem.duration));
+						
 						break;
+
 					case TweenTypes.CustomSize:
-						tweenTask.Add(TweenScale(subItem.initialValue, subItem.finalValue, subItem.tweenFormula, subItem.duration));
+
+						Vector2 currentSize, finalSize;
+
+						if (subItem is AbsoluteTween)
+						{
+							AbsoluteTween temp = (AbsoluteTween)subItem;
+
+							currentSize = _rectTransform.sizeDelta;
+							finalSize = temp.finalValue;
+						}
+						else
+						{
+							throw new Exception($"Unexpected tweening type detected: {subItem.GetType()}. Expected value(s) are: AbsoluteTween");
+						}
+
+						tweenTask.Add(TweenScale(currentSize, finalSize, subItem.tweenFormula, subItem.duration));
 						break;
 				}
 			}
