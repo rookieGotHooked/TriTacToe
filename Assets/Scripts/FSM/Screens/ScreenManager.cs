@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Device;
 
 public class ScreenManager: FSM_ScreensManager<ScreensEnum>
 {
@@ -18,7 +20,6 @@ public class ScreenManager: FSM_ScreensManager<ScreensEnum>
 			// new GameplaySettingsScreen(_screenDefinitionDict[ScreensEnum.GameplaySettings]),
 			// new GameplayGuideScreen(_screenDefinitionDict[ScreensEnum.GameplayGuide]),
 		};
-
 		AddScreens();
 	}
 }

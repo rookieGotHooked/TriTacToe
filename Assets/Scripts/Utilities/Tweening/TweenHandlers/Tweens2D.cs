@@ -8,7 +8,7 @@ using UnityEngine;
 public class Tweens2D : MonoBehaviour
 {
 	private RectTransform _rectTransform;
-	private Transform _transform;
+	private readonly Transform _transform;
 
 	[Header("Usage Options")]
 
@@ -24,20 +24,18 @@ public class Tweens2D : MonoBehaviour
 
 	[SerializeField]
 	[Tooltip("Tween group orders that would run sequentially by configs")]
-	private List<TweenParallels> _tweenOrders = new List<TweenParallels>();
+	private List<TweenParallels> _tweenOrders = new();
 
-	private List<TweenParallels> _tweenCleanOrders = new List<TweenParallels>();
+	private readonly List<TweenParallels> _tweenCleanOrders = new();
 
 	private delegate float DelegatedFloat(float x);
-	private DelegatedFloat _tweenPositionDelegate;
-	private DelegatedFloat _tweenScaleDelegate;
-	private DelegatedFloat _tweenCustomSizeDelegate;
+	private readonly DelegatedFloat _tweenPositionDelegate;
+	private readonly DelegatedFloat _tweenScaleDelegate;
+	private readonly DelegatedFloat _tweenCustomSizeDelegate;
 
 	private void Awake()
 	{
-		_rectTransform = GetComponent<RectTransform>();
-
-		if (_rectTransform == null)
+		if (!TryGetComponent(out _rectTransform))
 		{
 			throw new Exception("GameObject does not contains RectTransform component");
 		}
@@ -101,108 +99,50 @@ public class Tweens2D : MonoBehaviour
 
 	private float TweenMapping(DelegatedFloat delegatedFloat, TweenFormulas selectedTweenType, float value)
 	{
-		switch (selectedTweenType)
+		delegatedFloat = selectedTweenType switch
 		{
-			case TweenFormulas.EaseInSine:
-				delegatedFloat = TweenMethods.EaseInSine;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseOutSine:
-				delegatedFloat = TweenMethods.EaseOutSine;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseInOutSine:
-				delegatedFloat = TweenMethods.EaseInOutSine;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseInQuad:
-				delegatedFloat = TweenMethods.EaseInQuad;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseOutQuad:
-				delegatedFloat = TweenMethods.EaseOutQuad;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseInOutQuad:
-				delegatedFloat = TweenMethods.EaseInOutQuad;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseInCubic:
-				delegatedFloat = TweenMethods.EaseInCubic;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseOutCubic:
-				delegatedFloat = TweenMethods.EaseOutCubic;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseInOutCubic:
-				delegatedFloat = TweenMethods.EaseInOutCubic;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseInQuart:
-				delegatedFloat = TweenMethods.EaseInQuart;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseOutQuart:
-				delegatedFloat = TweenMethods.EaseOutQuart;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseInOutQuart:
-				delegatedFloat = TweenMethods.EaseInOutQuart;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseInQuint:
-				delegatedFloat = TweenMethods.EaseInQuint;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseOutQuint:
-				delegatedFloat = TweenMethods.EaseOutQuint;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseInOutQuint:
-				delegatedFloat = TweenMethods.EaseInOutQuint;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseInExpo:
-				delegatedFloat = TweenMethods.EaseInExpo;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseOutExpo:
-				delegatedFloat = TweenMethods.EaseOutExpo;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseInOutExpo:
-				delegatedFloat = TweenMethods.EaseInOutExpo;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseInCirc:
-				delegatedFloat = TweenMethods.EaseInCirc;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseOutCirc:
-				delegatedFloat = TweenMethods.EaseOutCirc;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseInOutCirc:
-				delegatedFloat = TweenMethods.EaseInOutCirc;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseInBack:
-				delegatedFloat = TweenMethods.EaseInBack;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseOutBack:
-				delegatedFloat = TweenMethods.EaseOutBack;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseInOutBack:
-				delegatedFloat = TweenMethods.EaseInOutBack;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseInElastic:
-				delegatedFloat = TweenMethods.EaseInElastic;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseOutElastic:
-				delegatedFloat = TweenMethods.EaseOutElastic;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseInOutElastic:
-				delegatedFloat = TweenMethods.EaseInOutElastic;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseInBounce:
-				delegatedFloat = TweenMethods.EaseInBounce;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseOutBounce:
-				delegatedFloat = TweenMethods.EaseOutBounce;
-				return delegatedFloat(value);
-			case TweenFormulas.EaseInOutBounce:
-				delegatedFloat = TweenMethods.EaseInOutBounce;
-				return delegatedFloat(value);
-			default:
-				throw new Exception($"Unexpected TweenFormulas detected: {selectedTweenType}");
-		}
+			TweenFormulas.EaseInSine => TweenMethods.EaseInSine,
+			TweenFormulas.EaseOutSine => TweenMethods.EaseOutSine,
+			TweenFormulas.EaseInOutSine => TweenMethods.EaseInOutSine,
+			TweenFormulas.EaseInQuad => TweenMethods.EaseInQuad,
+			TweenFormulas.EaseOutQuad => TweenMethods.EaseOutQuad,
+			TweenFormulas.EaseInOutQuad => TweenMethods.EaseInOutQuad,
+			TweenFormulas.EaseInCubic => TweenMethods.EaseInCubic,
+			TweenFormulas.EaseOutCubic => TweenMethods.EaseOutCubic,
+			TweenFormulas.EaseInOutCubic => TweenMethods.EaseInOutCubic,
+			TweenFormulas.EaseInQuart => TweenMethods.EaseInQuart,
+			TweenFormulas.EaseOutQuart => TweenMethods.EaseOutQuart,
+			TweenFormulas.EaseInOutQuart => TweenMethods.EaseInOutQuart,
+			TweenFormulas.EaseInQuint => TweenMethods.EaseInQuint,
+			TweenFormulas.EaseOutQuint => TweenMethods.EaseOutQuint, 
+			TweenFormulas.EaseInOutQuint => TweenMethods.EaseInOutQuint,
+			TweenFormulas.EaseInExpo => TweenMethods.EaseInExpo,
+			TweenFormulas.EaseOutExpo => TweenMethods.EaseOutExpo,
+			TweenFormulas.EaseInOutExpo => TweenMethods.EaseInOutExpo,
+			TweenFormulas.EaseInCirc => TweenMethods.EaseInCirc,
+			TweenFormulas.EaseOutCirc => TweenMethods.EaseOutCirc,
+			TweenFormulas.EaseInOutCirc => TweenMethods.EaseInOutCirc,
+			TweenFormulas.EaseInBack => TweenMethods.EaseInBack,
+			TweenFormulas.EaseOutBack => TweenMethods.EaseOutBack,
+			TweenFormulas.EaseInOutBack => TweenMethods.EaseInOutBack,
+			TweenFormulas.EaseInElastic => TweenMethods.EaseInElastic,
+			TweenFormulas.EaseOutElastic => TweenMethods.EaseOutElastic,
+			TweenFormulas.EaseInOutElastic => TweenMethods.EaseInOutElastic,
+			TweenFormulas.EaseInBounce => TweenMethods.EaseInBounce,
+			TweenFormulas.EaseOutBounce => TweenMethods.EaseOutBounce,
+			TweenFormulas.EaseInOutBounce => TweenMethods.EaseInOutBounce,
+
+			_ => throw new Exception($"Unexpected TweenFormulas detected: {selectedTweenType}")
+		};
+
+		return delegatedFloat(value);
 	}
 
 	async private Task ExecuteTweenOrders()
 	{
 		foreach (var item in _tweenCleanOrders)
 		{
-			List<Task> tweenTask = new List<Task>();
+			List<Task> tweenTask = new();
 
 			foreach (var subItem in item.parallelTweens)
 			{
@@ -212,7 +152,7 @@ public class Tweens2D : MonoBehaviour
 
 						Vector2 currentPosition, finalPosition;
 
-						if (subItem is DirectionalMovement)
+						if (subItem is DirectionalMovement movementType)
 						{
 							if (_useAnchoredPosition)
 							{
@@ -223,29 +163,25 @@ public class Tweens2D : MonoBehaviour
 								currentPosition = _rectTransform.position;
 							}
 
-							DirectionalMovement temp = (DirectionalMovement)subItem;
+							DirectionalMovement temp = movementType;
 
-							switch (temp.direction)
+							finalPosition = temp.direction switch
 							{
-								case MovementDirection.MoveLeft:
-									finalPosition = new Vector2(currentPosition.x - temp.movementValue, currentPosition.y);
-									break;
-								case MovementDirection.MoveRight:
-									finalPosition = new Vector2(currentPosition.x + temp.movementValue, currentPosition.y);
-									break;
-								case MovementDirection.MoveUp:
-									finalPosition = new Vector2(currentPosition.x, currentPosition.y + temp.movementValue);
-									break;
-								case MovementDirection.MoveDown:
-									finalPosition = new Vector2(currentPosition.x, currentPosition.y - temp.movementValue);
-									break;
-								default:
-									throw new Exception($"Unexpected value detected: {temp.direction}. Expected values are: MoveLeft, MoveRight, MoveUp, MoveDown");
-							}
+								MovementDirection.MoveLeft 
+									=> new Vector2(currentPosition.x - temp.movementValue, currentPosition.y),
+								MovementDirection.MoveRight 
+									=> new Vector2(currentPosition.x + temp.movementValue, currentPosition.y),
+								MovementDirection.MoveUp 
+									=> new Vector2(currentPosition.x, currentPosition.y + temp.movementValue),
+								MovementDirection.MoveDown 
+									=> new Vector2(currentPosition.x, currentPosition.y - temp.movementValue),
+
+								_ => throw new Exception($"Unexpected value detected: {temp.direction}. Expected values are: MoveLeft, MoveRight, MoveUp, MoveDown"),
+							}; 
 						}
-						else if (subItem is AbsoluteTween)
+						else if (subItem is AbsoluteTween positionAbsoluteType)
 						{
-							AbsoluteTween temp = (AbsoluteTween)subItem;
+							AbsoluteTween temp = positionAbsoluteType;
 
 							currentPosition = temp.finalValue;
 							finalPosition = temp.finalValue;
@@ -262,9 +198,9 @@ public class Tweens2D : MonoBehaviour
 						
 						Vector2 currentScale, finalScale;
 
-						if (subItem is AbsoluteTween)
+						if (subItem is AbsoluteTween scaleAbsoluteType)
 						{
-							AbsoluteTween temp = (AbsoluteTween)subItem;
+							AbsoluteTween temp = scaleAbsoluteType;
 
 							currentScale = _rectTransform.localScale;
 							finalScale = temp.finalValue;
@@ -282,9 +218,9 @@ public class Tweens2D : MonoBehaviour
 
 						Vector2 currentSize, finalSize;
 
-						if (subItem is AbsoluteTween)
+						if (subItem is AbsoluteTween customSizeAbsoluteType)
 						{
-							AbsoluteTween temp = (AbsoluteTween)subItem;
+							AbsoluteTween temp = customSizeAbsoluteType;
 
 							currentSize = _rectTransform.sizeDelta;
 							finalSize = temp.finalValue;

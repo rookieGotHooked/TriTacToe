@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -6,7 +7,8 @@ using UnityEngine.UI;
 
 public abstract class FSM_ScreensManager<EScreen>: MonoBehaviour where EScreen : Enum
 {
-    protected FSM_ScreensManager<EScreen> _instance;
+	#region Base Singleton
+	protected FSM_ScreensManager<EScreen> _instance;
     public FSM_ScreensManager<EScreen> Instance
     {
         get
@@ -25,19 +27,28 @@ public abstract class FSM_ScreensManager<EScreen>: MonoBehaviour where EScreen :
             return _instance;
         }
     }
+	#endregion
 
+	#region Protected screen definitions and variables
 	protected BaseScreen<EScreen> _currentScreen;
 	protected EScreen _nextScreen;
+    protected ScreenTransitionCode _currentTransitionCode;
+
+	protected List<BaseScreen<EScreen>> _screensList;
 	protected Dictionary<EScreen, BaseScreen<EScreen>> _screenDict = new Dictionary<EScreen, BaseScreen<EScreen>>();
     protected Dictionary<EScreen, ScreenDefinition<EScreen>> _screenDefinitionDict = new Dictionary<EScreen, ScreenDefinition<EScreen>>();
-    protected List<BaseScreen<EScreen>> _screensList;
+    protected Dictionary<ScreenTransitionCode, List<ScreenTransitionGroup<EScreen>>> _transitionDict = new Dictionary<ScreenTransitionCode, List<ScreenTransitionGroup<EScreen>>>();
+	#endregion
 
-    [SerializeField] 
-    protected RectTransform _canvasGroup;
-
+	#region Serialized values
     [Header("Screen Assets Section")]
     [SerializeField]
     List<ScreenDefinition<EScreen>> _screenAssetsList = new List<ScreenDefinition<EScreen>>();
+
+    [Header("Screen Transitions Section")]
+    [SerializeField]
+    List<ScreenTransitionBase<EScreen>> _screenTransitions = new List<ScreenTransitionBase<EScreen>>();
+	#endregion
 
 	protected bool _transitioning = false;
 
@@ -91,11 +102,12 @@ public abstract class FSM_ScreensManager<EScreen>: MonoBehaviour where EScreen :
         }
     }
 
-    protected virtual void SetNextScreen(EScreen eScreen)
+    protected virtual void SetNextScreen(EScreen eScreen, ScreenTransitionCode transitionCode)
     {
         if (_screenDict.ContainsKey(eScreen))
 		{
 			_nextScreen = eScreen;
+			_currentTransitionCode = transitionCode;
 		}
         else
         {
@@ -111,8 +123,45 @@ public abstract class FSM_ScreensManager<EScreen>: MonoBehaviour where EScreen :
 
             if (!result)
             {
-                throw new Exception("Encountered error during populating process of Assets Dict");
+                throw new Exception("Encountered error during populating process of _screenDefinitionDict");
             }
         }
 	}
+
+    protected virtual void PopulateTransitionDict()
+    {
+        foreach (var transition in _screenTransitions)
+        {
+            bool result = _transitionDict.TryAdd(transition.transitionCode, transition.transitionGroups);
+
+            if (!result)
+            {
+                throw new Exception("Encountered error during population process of _transitionDict");
+            }
+        }
+    }
+	async protected virtual Task ExecuteTransition()
+	{
+		if (_transitionDict.ContainsKey(_currentTransitionCode))
+        {
+            foreach (var transitionGroup in _transitionDict[_currentTransitionCode])
+            {
+                List<Task> transitionTask = new List<Task>();
+
+                foreach (var singleTransition in transitionGroup.transitionList)
+                {
+                    //transitionTask.Add(singleTransition);
+                }
+            }
+        }
+	}
+
+    protected virtual Task TransitionMapping(SingleTransition<EScreen> singleTransition)
+    {
+        BaseScreen<EScreen> screenToTransition;
+        if (_screenDict.TryGetValue(singleTransition.screen, out screenToTransition))
+        {
+            return screenToTransition.
+        }
+    }
 }
