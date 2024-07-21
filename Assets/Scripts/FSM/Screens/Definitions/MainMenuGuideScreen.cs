@@ -2,11 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Device;
 
-public class MainMenuScreen : BaseScreen<ScreensEnum>
+public class MainMenuGuideScreen : BaseScreen<ScreensEnum>
 {
-	public MainMenuScreen(ScreenDefinition<ScreensEnum> screenDefinition) : base(screenDefinition)
+	public MainMenuGuideScreen(ScreenDefinition<ScreensEnum> screenDefinition) : base(screenDefinition)
 	{
 		if (screenDefinition != null)
 		{
@@ -29,11 +28,11 @@ public class MainMenuScreen : BaseScreen<ScreensEnum>
 
 	public override void OnUpdate()
 	{
-		
+
 	}
 
 	public override void OnExit()
 	{
-		
+
 	}
 }

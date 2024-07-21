@@ -3,8 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Device;
-
-[CreateAssetMenu(fileName = "New Screen Transition", menuName = "Scriptable Object/Screen Transition")]
 public class ScreenTransitionBase<EScreen> : ScriptableObject
     where EScreen: Enum
 {
@@ -35,6 +33,7 @@ public enum ScreenTransitionCode
 public class ScreenTransitionGroup<EScreen> 
     where EScreen: Enum
 {
+    public string transitionGroupName;
 	public List<SingleTransition<EScreen>> transitionList;
 }
 
@@ -43,6 +42,7 @@ public class ScreenTransitionGroup<EScreen>
 public class SingleTransition<EScreen>
 	where EScreen : Enum
 {
+    public string transitionName;
     public EScreen screen;
     public DirectionalMovement directionalMovement;
 }

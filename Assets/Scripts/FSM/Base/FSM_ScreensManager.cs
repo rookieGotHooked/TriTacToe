@@ -75,12 +75,16 @@ public abstract class FSM_ScreensManager<EScreen>: MonoBehaviour where EScreen :
         }
     }
 
-    protected virtual void ChangeScreen(EScreen screenKey)
+    async protected virtual void ChangeScreen(EScreen screenKey)
     {
         _transitioning = true;
+
+        await ExecuteTransition();
+
         _currentScreen.OnExit();
         _currentScreen = _screenDict[screenKey];
         _currentScreen.OnEnter();
+
         _transitioning = false;
     }
 
@@ -150,18 +154,32 @@ public abstract class FSM_ScreensManager<EScreen>: MonoBehaviour where EScreen :
 
                 foreach (var singleTransition in transitionGroup.transitionList)
                 {
-                    //transitionTask.Add(singleTransition);
+                    transitionTask.Add(
+                        _screenDict[singleTransition.screen].TransitionMapping(
+                            singleTransition.directionalMovement.direction,
+                            singleTransition.directionalMovement.movementValue, 
+                            singleTransition.directionalMovement.tweenFormula, 
+                            singleTransition.directionalMovement.duration));
+                }
+
+                foreach (var task in transitionTask)
+                {
+                    await task;
                 }
             }
         }
+        else
+        {
+            throw new Exception($"Unexpected value: Unknown key received {_currentTransitionCode}");
+        }
 	}
 
-    protected virtual Task TransitionMapping(SingleTransition<EScreen> singleTransition)
-    {
-        BaseScreen<EScreen> screenToTransition;
-        if (_screenDict.TryGetValue(singleTransition.screen, out screenToTransition))
-        {
-            return screenToTransition.
-        }
-    }
+    //protected virtual Task TransitionMapping(SingleTransition<EScreen> singleTransition)
+    //{
+    //    BaseScreen<EScreen> screenToTransition;
+    //    if (_screenDict.TryGetValue(singleTransition.screen, out screenToTransition))
+    //    {
+    //        return screenToTransition.
+    //    }
+    //}
 }

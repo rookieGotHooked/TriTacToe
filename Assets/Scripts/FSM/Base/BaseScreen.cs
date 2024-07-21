@@ -20,6 +20,8 @@ public abstract class BaseScreen<EScreen>: IState
 	protected Tweens2D _screenTransitionTween;
 	protected ScreenDefinition<EScreen> _screenDefinition;
 
+	protected List<Func<float, TweenFormulas, float, Task>> _transitionFunctions;
+
 	protected bool _isInit = false;
 
 	public EScreen ScreenKey { get; protected set; }
@@ -34,6 +36,8 @@ public abstract class BaseScreen<EScreen>: IState
 			_screenDefinition = screenDefinition;
 			_screenCanvasRectTransform = _screenObject.GetComponent<RectTransform>();
 			_screenTransitionTween = _screenObject.GetComponent<Tweens2D>();
+
+			//_transitionFunctions.Add()
 		}
 		else
 		{
@@ -67,12 +71,17 @@ public abstract class BaseScreen<EScreen>: IState
 				GameObject newGameObject = UnityEngine.Object.Instantiate(asset.Object, _screenCanvasRectTransform);
 				ObjectClassification(newGameObject, asset.Type);
 
-				LinearTransformTween initialTransition = newGameObject.GetComponent<LinearTransformTween>();
+				Tweens2D initialTransition;
 
-				if (initialTransition != null && !initialTransition.IsFunctionCallsOnly)
+				if (newGameObject.TryGetComponent(out initialTransition))
 				{
-					transitionTask.Add(initialTransition.TweenPosition());
+
 				}
+
+				//if (initialTransition != null && !initialTransition.IsFunctionCallsOnly)
+				//{
+				//	transitionTask.Add(initialTransition.TweenPosition());
+				//}
 			}
 
 			foreach (var task in transitionTask)
@@ -98,6 +107,21 @@ public abstract class BaseScreen<EScreen>: IState
 				_dynamicSpritesGameObject.Add(gameObj);
 				break;
 		}
+	}
+
+	public virtual Task TransitionMapping(MovementDirection direction, float movementValue, TweenFormulas tweenFormula, float transitionTime)
+	{
+		Task transitionTask = direction switch
+		{
+			MovementDirection.MoveLeft => MoveLeft(movementValue, tweenFormula, transitionTime),
+			MovementDirection.MoveRight => MoveRight(movementValue, tweenFormula, transitionTime),
+			MovementDirection.MoveUp => MoveUp(movementValue, tweenFormula, transitionTime),
+			MovementDirection.MoveDown => MoveDown(movementValue, tweenFormula, transitionTime),
+
+			_ => throw new Exception("Unexpected movement direction received")
+		};
+
+		return transitionTask;
 	}
 
 	#endregion

@@ -3,12 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
-[CreateAssetMenu(fileName = "New Screen Definition", menuName = "Scriptable Object/Screen Definition")]
 public class ScreenDefinition<EScreen>: ScriptableObject where EScreen : Enum
 {
-	[SerializeField] 
-	private string _screenName;
-
 	[SerializeField]
 	private EScreen _screenEnum;
 	public EScreen ScreenEnum { get => _screenEnum; }

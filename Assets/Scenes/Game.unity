@@ -167,8 +167,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31c0b82b2b18b9f4b929fb7fb996f3a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _canvasGroup: {fileID: 0}
-  _screenAssetsList: []
+  _screenAssetsList:
+  - {fileID: 11400000, guid: d0c8024d82e660147acd973e25c41a21, type: 2}
+  - {fileID: 11400000, guid: 1187346ea8d41e44f81e42af4c1d984d, type: 2}
+  - {fileID: 11400000, guid: ec13e5734427acb4da7ea35a00097c55, type: 2}
+  - {fileID: 11400000, guid: 95bddc935ab08814cb69e269307affb6, type: 2}
+  - {fileID: 11400000, guid: bacb56a218e8e3841ae40d735ba45dda, type: 2}
+  - {fileID: 11400000, guid: 5744c23e22863174e9f315c0da1601e6, type: 2}
+  _screenTransitions:
+  - {fileID: 0}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -283,7 +290,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &748745622
 MonoBehaviour:
   m_ObjectHideFlags: 0

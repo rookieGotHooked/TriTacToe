@@ -2,11 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Device;
 
-public class MainMenuScreen : BaseScreen<ScreensEnum>
+public class MainMenuSettingsScreen : BaseScreen<ScreensEnum>
 {
-	public MainMenuScreen(ScreenDefinition<ScreensEnum> screenDefinition) : base(screenDefinition)
+	public MainMenuSettingsScreen(ScreenDefinition<ScreensEnum> screenDefinition) : base(screenDefinition)
 	{
 		if (screenDefinition != null)
 		{
@@ -14,7 +13,7 @@ public class MainMenuScreen : BaseScreen<ScreensEnum>
 		}
 		else
 		{
-			throw new Exception($"{GetType().Name} assets is null.");
+			throw new Exception($"{GetType().Name} assets is null");
 		}
 	}
 
@@ -29,11 +28,11 @@ public class MainMenuScreen : BaseScreen<ScreensEnum>
 
 	public override void OnUpdate()
 	{
-		
+
 	}
 
 	public override void OnExit()
 	{
-		
+
 	}
 }
