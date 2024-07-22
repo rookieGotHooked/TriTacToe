@@ -11,7 +11,7 @@ public class ScreenDefinition<EScreen>: ScriptableObject where EScreen : Enum
 
 	[SerializeField]
 	private GameObject _screenObject;
-	public GameObject ScreenObject { get => _screenObject; set => _screenObject = value; }
+	public GameObject ScreenObject { get => _screenObject; }
 
 	[SerializeField] private List<ObjectGroup> _objectGroupsList;
 	public List<ObjectGroup> ObjectGroupsList { get => _objectGroupsList; }

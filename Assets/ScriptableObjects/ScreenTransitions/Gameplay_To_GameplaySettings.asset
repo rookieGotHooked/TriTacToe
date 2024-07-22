@@ -10,20 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7aa37b21ab478fd4cac5655cedfd6c33, type: 3}
-  m_Name: MainMenu_To_MainMenuSettings 6
+  m_Name: Gameplay_To_GameplaySettings
   m_EditorClassIdentifier: 
-  transitionCode: 0
+  transitionCode: 5
   transitionGroups:
   - transitionGroupName: Transition out of Main Camera area
     transitionList:
-    - transitionName: MainMenu MoveDown
-      screen: 0
+    - transitionName: Gameplay MoveDown
+      screen: 5
       directionalMovement: {fileID: 11400000, guid: 94a5836edd472c340890efe5e9ef1415, type: 2}
-    - transitionName: MainMenuGuide MoveDown
-      screen: 2
+    - transitionName: GameplayGuide MoveDown
+      screen: 5
       directionalMovement: {fileID: 11400000, guid: 94a5836edd472c340890efe5e9ef1415, type: 2}
   - transitionGroupName: Transition into Main Camera area
     transitionList:
-    - transitionName: MainMenuSettings MoveDown
-      screen: 1
+    - transitionName: GameplaySettings MoveDown
+      screen: 4
       directionalMovement: {fileID: 11400000, guid: 94a5836edd472c340890efe5e9ef1415, type: 2}

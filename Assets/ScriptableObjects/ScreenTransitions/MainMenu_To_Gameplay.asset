@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7aa37b21ab478fd4cac5655cedfd6c33, type: 3}
   m_Name: MainMenu_To_Gameplay
   m_EditorClassIdentifier: 
-  transitionCode: 0
+  transitionCode: 2
   transitionGroups:
   - transitionGroupName: Transition out of Main Camera area
     transitionList:

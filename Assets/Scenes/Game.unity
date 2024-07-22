@@ -175,7 +175,17 @@ MonoBehaviour:
   - {fileID: 11400000, guid: bacb56a218e8e3841ae40d735ba45dda, type: 2}
   - {fileID: 11400000, guid: 5744c23e22863174e9f315c0da1601e6, type: 2}
   _screenTransitions:
-  - {fileID: 0}
+  - {fileID: 11400000, guid: c6abc081e537102468a028dac5d49e78, type: 2}
+  - {fileID: 11400000, guid: c81f304a0d67d66468010821f44effab, type: 2}
+  - {fileID: 11400000, guid: c210d3bda08e8ac468beb5d881f8748b, type: 2}
+  - {fileID: 11400000, guid: f71749e2cdeba0845bfc80159957c0f4, type: 2}
+  - {fileID: 11400000, guid: 0d6510c953e142945b4e5ddd787e08e5, type: 2}
+  - {fileID: 11400000, guid: 7c477186fe02fb944a38b50b56071144, type: 2}
+  - {fileID: 11400000, guid: 35c09d718ef02f44e80f7bbc51f53c7c, type: 2}
+  - {fileID: 11400000, guid: f7837eceebf09be4abf1e0c70fd80a7f, type: 2}
+  - {fileID: 11400000, guid: 62c36b3b326fec74e9a370419651eef5, type: 2}
+  - {fileID: 11400000, guid: 3e665b956c6739c4e8343b3160a23256, type: 2}
+  - {fileID: 11400000, guid: 49757fa5ef876d4478a11827c18032ba, type: 2}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0

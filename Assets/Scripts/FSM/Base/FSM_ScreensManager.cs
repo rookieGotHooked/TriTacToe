@@ -173,13 +173,4 @@ public abstract class FSM_ScreensManager<EScreen>: MonoBehaviour where EScreen :
             throw new Exception($"Unexpected value: Unknown key received {_currentTransitionCode}");
         }
 	}
-
-    //protected virtual Task TransitionMapping(SingleTransition<EScreen> singleTransition)
-    //{
-    //    BaseScreen<EScreen> screenToTransition;
-    //    if (_screenDict.TryGetValue(singleTransition.screen, out screenToTransition))
-    //    {
-    //        return screenToTransition.
-    //    }
-    //}
 }

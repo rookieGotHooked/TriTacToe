@@ -13,8 +13,7 @@ public abstract class BaseScreen<EScreen>: IState
 	#region Variables and Constructor
 	protected bool _clicked = false;
 
-	protected GameObject _screenObject;
-	public GameObject ScreenObject { get => _screenObject; }
+	public readonly GameObject ScreenObject;
 
 	protected RectTransform _screenCanvasRectTransform;
 	protected Tweens2D _screenTransitionTween;
@@ -32,10 +31,10 @@ public abstract class BaseScreen<EScreen>: IState
 		{
 			ScreenKey = screenDefinition.ScreenEnum;
 
-			_screenObject = screenDefinition.ScreenObject;
+			ScreenObject = screenDefinition.ScreenObject;
 			_screenDefinition = screenDefinition;
-			_screenCanvasRectTransform = _screenObject.GetComponent<RectTransform>();
-			_screenTransitionTween = _screenObject.GetComponent<Tweens2D>();
+			_screenCanvasRectTransform = ScreenObject.GetComponent<RectTransform>();
+			_screenTransitionTween = ScreenObject.GetComponent<Tweens2D>();
 
 			//_transitionFunctions.Add()
 		}
@@ -129,15 +128,15 @@ public abstract class BaseScreen<EScreen>: IState
 	#region Screen Transition functions
 	async public virtual Task MoveLeft(float movementValue, TweenFormulas tweenFormula, float transitionTime)
 	{
-		RectTransform currentRectTransform = _screenObject.GetComponent<RectTransform>();
+		RectTransform currentRectTransform = ScreenObject.GetComponent<RectTransform>();
 
 		if (_screenTransitionTween == null)
 		{
-			_screenTransitionTween = _screenObject.GetComponent<Tweens2D>();
+			_screenTransitionTween = ScreenObject.GetComponent<Tweens2D>();
 
 			if (_screenTransitionTween == null)
 			{
-				_screenTransitionTween = _screenObject.AddComponent<Tweens2D>();
+				_screenTransitionTween = ScreenObject.AddComponent<Tweens2D>();
 			}
 
 			if (movementValue < 0)
@@ -158,15 +157,15 @@ public abstract class BaseScreen<EScreen>: IState
 	}
 	async public virtual Task MoveRight(float movementValue, TweenFormulas tweenFormula, float transitionTime)
 	{
-		RectTransform currentRectTransform = _screenObject.GetComponent<RectTransform>();
+		RectTransform currentRectTransform = ScreenObject.GetComponent<RectTransform>();
 
 		if (_screenTransitionTween == null)
 		{
-			_screenTransitionTween = _screenObject.GetComponent<Tweens2D>();
+			_screenTransitionTween = ScreenObject.GetComponent<Tweens2D>();
 
 			if (_screenTransitionTween == null)
 			{
-				_screenTransitionTween = _screenObject.AddComponent<Tweens2D>();
+				_screenTransitionTween = ScreenObject.AddComponent<Tweens2D>();
 			}
 
 			if (movementValue < 0)
@@ -187,15 +186,15 @@ public abstract class BaseScreen<EScreen>: IState
 
 	async public virtual Task MoveUp(float movementValue, TweenFormulas tweenFormula, float transitionTime)
 	{
-		RectTransform currentRectTransform = _screenObject.GetComponent<RectTransform>();
+		RectTransform currentRectTransform = ScreenObject.GetComponent<RectTransform>();
 
 		if (_screenTransitionTween == null)
 		{
-			_screenTransitionTween = _screenObject.GetComponent<Tweens2D>();
+			_screenTransitionTween = ScreenObject.GetComponent<Tweens2D>();
 
 			if (_screenTransitionTween == null)
 			{
-				_screenTransitionTween = _screenObject.AddComponent<Tweens2D>();
+				_screenTransitionTween = ScreenObject.AddComponent<Tweens2D>();
 			}
 
 			if (movementValue < 0)
@@ -216,15 +215,15 @@ public abstract class BaseScreen<EScreen>: IState
 
 	async public virtual Task MoveDown(float movementValue, TweenFormulas tweenFormula, float transitionTime)
 	{
-		RectTransform currentRectTransform = _screenObject.GetComponent<RectTransform>();
+		RectTransform currentRectTransform = ScreenObject.GetComponent<RectTransform>();
 
 		if (_screenTransitionTween == null)
 		{
-			_screenTransitionTween = _screenObject.GetComponent<Tweens2D>();
+			_screenTransitionTween = ScreenObject.GetComponent<Tweens2D>();
 
 			if (_screenTransitionTween == null)
 			{
-				_screenTransitionTween = _screenObject.AddComponent<Tweens2D>();
+				_screenTransitionTween = ScreenObject.AddComponent<Tweens2D>();
 			}
 
 			if (movementValue < 0)
