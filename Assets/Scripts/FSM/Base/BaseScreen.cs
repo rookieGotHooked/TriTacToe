@@ -4,8 +4,6 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
-using static System.TimeZoneInfo;
 
 public abstract class BaseScreen<EScreen>: IState 
 	where EScreen: Enum
@@ -14,14 +12,14 @@ public abstract class BaseScreen<EScreen>: IState
 	protected bool _clicked = false;
 
 	public readonly GameObject ScreenObject;
+	protected bool _isInit = false;
+	public bool IsInit { get => _isInit; }
 
 	protected RectTransform _screenCanvasRectTransform;
 	protected Tweens2D _screenTransitionTween;
 	protected ScreenDefinition<EScreen> _screenDefinition;
 
 	protected List<Func<float, TweenFormulas, float, Task>> _transitionFunctions;
-
-	protected bool _isInit = false;
 
 	public EScreen ScreenKey { get; protected set; }
 
@@ -35,8 +33,6 @@ public abstract class BaseScreen<EScreen>: IState
 			_screenDefinition = screenDefinition;
 			_screenCanvasRectTransform = ScreenObject.GetComponent<RectTransform>();
 			_screenTransitionTween = ScreenObject.GetComponent<Tweens2D>();
-
-			//_transitionFunctions.Add()
 		}
 		else
 		{
@@ -58,6 +54,11 @@ public abstract class BaseScreen<EScreen>: IState
 
 
 	#region Helper virtual functions
+
+	public void SetInit()
+	{
+		_isInit = true;
+	}
 
 	async virtual public Task InstantiateObjects()
 	{
@@ -112,10 +113,10 @@ public abstract class BaseScreen<EScreen>: IState
 	{
 		Task transitionTask = direction switch
 		{
-			MovementDirection.MoveLeft => MoveLeft(movementValue, tweenFormula, transitionTime),
-			MovementDirection.MoveRight => MoveRight(movementValue, tweenFormula, transitionTime),
-			MovementDirection.MoveUp => MoveUp(movementValue, tweenFormula, transitionTime),
-			MovementDirection.MoveDown => MoveDown(movementValue, tweenFormula, transitionTime),
+			MovementDirection.MoveLeftToRight => MoveLeftToRight(movementValue, tweenFormula, transitionTime),
+			MovementDirection.MoveRightToLeft => MoveRightToLeft(movementValue, tweenFormula, transitionTime),
+			MovementDirection.MoveBottomToTop => MoveBottomToTop(movementValue, tweenFormula, transitionTime),
+			MovementDirection.MoveTopToBottom => MoveTopToBottom(movementValue, tweenFormula, transitionTime),
 
 			_ => throw new Exception("Unexpected movement direction received")
 		};
@@ -126,7 +127,7 @@ public abstract class BaseScreen<EScreen>: IState
 	#endregion
 
 	#region Screen Transition functions
-	async public virtual Task MoveLeft(float movementValue, TweenFormulas tweenFormula, float transitionTime)
+	async public virtual Task MoveLeftToRight(float movementValue, TweenFormulas tweenFormula, float transitionTime)
 	{
 		RectTransform currentRectTransform = ScreenObject.GetComponent<RectTransform>();
 
@@ -141,50 +142,21 @@ public abstract class BaseScreen<EScreen>: IState
 
 			if (movementValue < 0)
 			{
-				Debug.LogWarning($"The current {GetType().Name} MoveDown is called with negative movementValue; recommend using MoveUp function.");
+				Debug.LogWarning($"The current {GetType().Name} MoveLeftToRight is called with negative movementValue; recommend using MoveRightToLeft function.");
 			}
 			else if (movementValue == 0)
 			{
-				Debug.LogWarning($"Tweening value of {GetType().Name} MoveDown is equals 0. No action taken.");
-			}
-		}
-
-		await _screenTransitionTween.TweenPosition(
-			currentRectTransform.anchoredPosition, 
-			new Vector2(currentRectTransform.anchoredPosition.x - movementValue, currentRectTransform.anchoredPosition.y),
-			tweenFormula,
-			transitionTime);
-	}
-	async public virtual Task MoveRight(float movementValue, TweenFormulas tweenFormula, float transitionTime)
-	{
-		RectTransform currentRectTransform = ScreenObject.GetComponent<RectTransform>();
-
-		if (_screenTransitionTween == null)
-		{
-			_screenTransitionTween = ScreenObject.GetComponent<Tweens2D>();
-
-			if (_screenTransitionTween == null)
-			{
-				_screenTransitionTween = ScreenObject.AddComponent<Tweens2D>();
-			}
-
-			if (movementValue < 0)
-			{
-				Debug.LogWarning($"The current {GetType().Name} MoveDown is called with negative movementValue; recommend using MoveUp function.");
-			}
-			else if (movementValue == 0)
-			{
-				Debug.LogWarning($"Tweening value of {GetType().Name} MoveDown is equals 0. No action taken.");
+				Debug.LogWarning($"Tweening value of {GetType().Name} MoveLeftToRight is equals 0. No action taken.");
 			}
 		}
 
 		await _screenTransitionTween.TweenPosition(
 			currentRectTransform.anchoredPosition, 
 			new Vector2(currentRectTransform.anchoredPosition.x + movementValue, currentRectTransform.anchoredPosition.y),
-			tweenFormula, transitionTime);
+			tweenFormula,
+			transitionTime);
 	}
-
-	async public virtual Task MoveUp(float movementValue, TweenFormulas tweenFormula, float transitionTime)
+	async public virtual Task MoveRightToLeft(float movementValue, TweenFormulas tweenFormula, float transitionTime)
 	{
 		RectTransform currentRectTransform = ScreenObject.GetComponent<RectTransform>();
 
@@ -199,11 +171,40 @@ public abstract class BaseScreen<EScreen>: IState
 
 			if (movementValue < 0)
 			{
-				Debug.LogWarning($"The current {GetType().Name} MoveDown is called with negative movementValue; recommend using MoveUp function.");
+				Debug.LogWarning($"The current {GetType().Name} MoveRightToLeft is called with negative movementValue; recommend using MoveLeftToRight function.");
 			}
 			else if (movementValue == 0)
 			{
-				Debug.LogWarning($"Tweening value of {GetType().Name} MoveDown is equals 0. No action taken.");
+				Debug.LogWarning($"Tweening value of {GetType().Name} MoveRightToLeft is equals 0. No action taken.");
+			}
+		}
+
+		await _screenTransitionTween.TweenPosition(
+			currentRectTransform.anchoredPosition, 
+			new Vector2(currentRectTransform.anchoredPosition.x - movementValue, currentRectTransform.anchoredPosition.y),
+			tweenFormula, transitionTime);
+	}
+
+	async public virtual Task MoveBottomToTop(float movementValue, TweenFormulas tweenFormula, float transitionTime)
+	{
+		RectTransform currentRectTransform = ScreenObject.GetComponent<RectTransform>();
+
+		if (_screenTransitionTween == null)
+		{
+			_screenTransitionTween = ScreenObject.GetComponent<Tweens2D>();
+
+			if (_screenTransitionTween == null)
+			{
+				_screenTransitionTween = ScreenObject.AddComponent<Tweens2D>();
+			}
+
+			if (movementValue < 0)
+			{
+				Debug.LogWarning($"The current {GetType().Name} MoveBottomToTop is called with negative movementValue; recommend using MoveTopToBottom function.");
+			}
+			else if (movementValue == 0)
+			{
+				Debug.LogWarning($"Tweening value of {GetType().Name} MoveBottomToTop is equals 0. No action taken.");
 			}
 		}
 
@@ -213,7 +214,7 @@ public abstract class BaseScreen<EScreen>: IState
 			tweenFormula, transitionTime);
 	}
 
-	async public virtual Task MoveDown(float movementValue, TweenFormulas tweenFormula, float transitionTime)
+	async public virtual Task MoveTopToBottom(float movementValue, TweenFormulas tweenFormula, float transitionTime)
 	{
 		RectTransform currentRectTransform = ScreenObject.GetComponent<RectTransform>();
 
@@ -228,11 +229,11 @@ public abstract class BaseScreen<EScreen>: IState
 
 			if (movementValue < 0)
 			{
-				Debug.LogWarning($"The current { GetType().Name } MoveDown is called with negative movementValue; recommend using MoveUp function.");
+				Debug.LogWarning($"The current { GetType().Name } MoveTopToBottom is called with negative movementValue; recommend using MoveBottomToTop function.");
 			} 
 			else if (movementValue == 0)
 			{
-				Debug.LogWarning($"Tweening value of { GetType().Name } MoveDown is equals 0. No action taken.");
+				Debug.LogWarning($"Tweening value of { GetType().Name } MoveTopToBottom is equals 0. No action taken.");
 				return;
 			}
 		}
@@ -243,4 +244,12 @@ public abstract class BaseScreen<EScreen>: IState
 			tweenFormula, transitionTime);
 	}
 	#endregion
+
+	public void SetInteractableButtons(bool value)
+	{
+		foreach (var btn in _buttonsGameObject)
+		{
+			btn.GetComponent<UnityEngine.UI.Button>().interactable = value;
+		}
+	}
 }

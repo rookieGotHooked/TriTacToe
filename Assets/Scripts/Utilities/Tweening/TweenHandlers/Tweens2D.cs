@@ -24,9 +24,14 @@ public class Tweens2D : MonoBehaviour
 
 	[SerializeField]
 	[Tooltip("Tween group orders that would run sequentially by configs")]
-	private List<TweenParallels> _tweenOrders = new();
+	private List<TweenParallels> _tweenInitialOrders = new();
+
+	[SerializeField]
+	[Tooltip("Presets of separated tween group orders for function calls; will be added with string into a dictionary for using as order call")]
+	private List<TweenRepeatableOrders> _tweenRepeatableOrders = new();
 
 	private readonly List<TweenParallels> _tweenCleanOrders = new();
+	private readonly Dictionary<string, TweenParallels> _tweenRepeatableDict = new();
 
 	private delegate float DelegatedFloat(float x);
 	private readonly DelegatedFloat _tweenPositionDelegate;
@@ -41,7 +46,7 @@ public class Tweens2D : MonoBehaviour
 		}
 
 		CheckAndPopulateTweenOrder();
-
+		CheckAndPopulateRepeatableTweenOrders();
 	}
 
 	async void Start()
@@ -55,25 +60,40 @@ public class Tweens2D : MonoBehaviour
 	#region Internal handler functions
 	private void CheckAndPopulateTweenOrder()
 	{
-		if (_isFunctionCallsOnly && _tweenOrders.Count > 0)
+		if (_isFunctionCallsOnly && _tweenInitialOrders.Count > 0)
 		{
 			Debug.LogWarning($"{gameObject.name} is set to function calls only while contains existing tween orders; tween orders will be ignored");
 		}
-		else if (!_isFunctionCallsOnly && _tweenOrders.Count == 0)
+		else if (!_isFunctionCallsOnly && _tweenInitialOrders.Count == 0)
 		{
 			throw new Exception($"Missing values: {gameObject.name} does not have any tween orders and does not set to function calls only");
 		}
 		else
 		{
-			int posCount = 0;
-			int scaleCount = 0;
-			int sizeCount = 0;
-
-			foreach (var item in _tweenOrders)
+			foreach (var item in _tweenInitialOrders)
 			{
+				int posCount = 0;
+				int scaleCount = 0;
+				int sizeCount = 0;
+
 				foreach (var subItem in item.parallelTweens)
 				{
-					switch (subItem.tweenTypes)
+					TweenTypes subItemTweenType;
+
+					if (subItem is AbsoluteTween absoluteTweenItem)
+					{
+						subItemTweenType = absoluteTweenItem.tweenTypes;
+					}
+					else if (subItem is DirectionalMovement)
+					{
+						subItemTweenType = TweenTypes.Position;
+					}
+					else
+					{
+						throw new Exception($"Unexpected values: {subItem.GetType()} is not supported");
+					}
+
+					switch (subItemTweenType)
 					{
 						case TweenTypes.Position:
 							posCount++;
@@ -93,6 +113,59 @@ public class Tweens2D : MonoBehaviour
 				}
 
 				_tweenCleanOrders.Add(item);
+			}
+		}
+	}
+
+	public void CheckAndPopulateRepeatableTweenOrders()
+	{
+		foreach(var item in _tweenRepeatableOrders)
+		{
+			int posCount = 0;
+			int scaleCount = 0;
+			int sizeCount = 0;
+
+			foreach (var subItem in item.TweenParallel.parallelTweens)
+			{
+				TweenTypes subItemTweenType;
+
+				if (subItem is AbsoluteTween absoluteTweenItem)
+				{
+					subItemTweenType = absoluteTweenItem.tweenTypes;
+				}
+				else if (subItem is DirectionalMovement)
+				{
+					subItemTweenType = TweenTypes.Position;
+				}
+				else
+				{
+					throw new Exception($"Unexpected values: {subItem.GetType()} is not supported");
+				}
+
+				switch (subItemTweenType)
+				{
+					case TweenTypes.Position:
+						posCount++;
+						break;
+					case TweenTypes.Scale:
+						scaleCount++;
+						break;
+					case TweenTypes.CustomSize:
+						sizeCount++;
+						break;
+				}
+
+				if (posCount > 1 || scaleCount > 1 || sizeCount > 1)
+				{
+					throw new Exception("Invalid data: Multiple calls of the same tween type at the same time is not supported");
+				}
+			}
+
+			bool res = _tweenRepeatableDict.TryAdd(item.RepeatableOrderName, item.TweenParallel);
+
+			if (!res)
+			{
+				throw new Exception("Failed to add repeatable tween order into repeatable order dictionary");
 			}
 		}
 	}
@@ -146,7 +219,18 @@ public class Tweens2D : MonoBehaviour
 
 			foreach (var subItem in item.parallelTweens)
 			{
-				switch (subItem.tweenTypes) 
+				TweenTypes subItemTweenType;
+
+				if (subItem is AbsoluteTween absoluteTweenItem)
+				{
+					subItemTweenType = absoluteTweenItem.tweenTypes;
+				}
+				else
+				{
+					subItemTweenType = TweenTypes.Position;
+				}
+
+				switch (subItemTweenType) 
 				{
 					case TweenTypes.Position:
 
@@ -167,13 +251,13 @@ public class Tweens2D : MonoBehaviour
 
 							finalPosition = temp.direction switch
 							{
-								MovementDirection.MoveLeft 
+								MovementDirection.MoveLeftToRight
 									=> new Vector2(currentPosition.x - temp.movementValue, currentPosition.y),
-								MovementDirection.MoveRight 
+								MovementDirection.MoveRightToLeft
 									=> new Vector2(currentPosition.x + temp.movementValue, currentPosition.y),
-								MovementDirection.MoveUp 
+								MovementDirection.MoveBottomToTop
 									=> new Vector2(currentPosition.x, currentPosition.y + temp.movementValue),
-								MovementDirection.MoveDown 
+								MovementDirection.MoveTopToBottom
 									=> new Vector2(currentPosition.x, currentPosition.y - temp.movementValue),
 
 								_ => throw new Exception($"Unexpected value detected: {temp.direction}. Expected values are: MoveLeft, MoveRight, MoveUp, MoveDown"),
@@ -238,6 +322,125 @@ public class Tweens2D : MonoBehaviour
 			foreach (var tween in tweenTask)
 			{
 				await tween;
+			}
+		}
+	}
+
+	async public void ExecuteTweenOrders(string orderName)
+	{
+		if (!_tweenRepeatableDict.ContainsKey(orderName))
+		{
+			throw new Exception($"Received order does not exists; orderName: {orderName}");
+		}
+		else
+		{
+			List<Task> tweenTask = new();
+
+			foreach (var item in _tweenRepeatableDict[orderName].parallelTweens)
+			{
+				TweenTypes subItemTweenType;
+
+				if (item is AbsoluteTween absoluteTweenItem)
+				{
+					subItemTweenType = absoluteTweenItem.tweenTypes;
+				}
+				else
+				{
+					subItemTweenType = TweenTypes.Position;
+				}
+
+				switch (subItemTweenType)
+				{
+					case TweenTypes.Position:
+
+						Vector2 currentPosition, finalPosition;
+
+						if (item is DirectionalMovement movementType)
+						{
+							if (_useAnchoredPosition)
+							{
+								currentPosition = _rectTransform.anchoredPosition;
+							}
+							else
+							{
+								currentPosition = _rectTransform.position;
+							}
+
+							DirectionalMovement temp = movementType;
+
+							finalPosition = temp.direction switch
+							{
+								MovementDirection.MoveLeftToRight
+									=> new Vector2(currentPosition.x - temp.movementValue, currentPosition.y),
+								MovementDirection.MoveRightToLeft
+									=> new Vector2(currentPosition.x + temp.movementValue, currentPosition.y),
+								MovementDirection.MoveBottomToTop
+									=> new Vector2(currentPosition.x, currentPosition.y + temp.movementValue),
+								MovementDirection.MoveTopToBottom
+									=> new Vector2(currentPosition.x, currentPosition.y - temp.movementValue),
+
+								_ => throw new Exception($"Unexpected value detected: {temp.direction}. Expected values are: MoveLeft, MoveRight, MoveUp, MoveDown"),
+							};
+						}
+						else if (item is AbsoluteTween positionAbsoluteType)
+						{
+							AbsoluteTween temp = positionAbsoluteType;
+
+							currentPosition = temp.finalValue;
+							finalPosition = temp.finalValue;
+						}
+						else
+						{
+							throw new Exception($"Unexpected movement type detected: {item.GetType()}. Expected values are: DirectionalMovement, PositionalMovement");
+						}
+						tweenTask.Add(TweenPosition(currentPosition, finalPosition, item.tweenFormula, item.duration));
+
+						break;
+
+					case TweenTypes.Scale:
+
+						Vector2 currentScale, finalScale;
+
+						if (item is AbsoluteTween scaleAbsoluteType)
+						{
+							AbsoluteTween temp = scaleAbsoluteType;
+
+							currentScale = _rectTransform.localScale;
+							finalScale = temp.finalValue;
+						}
+						else
+						{
+							throw new Exception($"Unexpected tweening type detected: {item.GetType()}. Expected value(s) are: AbsoluteTween");
+						}
+
+						tweenTask.Add(TweenCustomSize(currentScale, finalScale, item.tweenFormula, item.duration));
+
+						break;
+
+					case TweenTypes.CustomSize:
+
+						Vector2 currentSize, finalSize;
+
+						if (item is AbsoluteTween customSizeAbsoluteType)
+						{
+							AbsoluteTween temp = customSizeAbsoluteType;
+
+							currentSize = _rectTransform.sizeDelta;
+							finalSize = temp.finalValue;
+						}
+						else
+						{
+							throw new Exception($"Unexpected tweening type detected: {item.GetType()}. Expected value(s) are: AbsoluteTween");
+						}
+
+						tweenTask.Add(TweenScale(currentSize, finalSize, item.tweenFormula, item.duration));
+						break;
+				}
+			}
+
+			foreach (var task in tweenTask)
+			{
+				await task;
 			}
 		}
 	}
@@ -365,4 +568,14 @@ public class Tweens2D : MonoBehaviour
 	}
 
 	#endregion
+}
+
+[Serializable]
+public class TweenRepeatableOrders
+{
+	[SerializeField] string _repeatableOrderName;
+	public string RepeatableOrderName { get => _repeatableOrderName; }
+
+	[SerializeField] TweenParallels _tweenParallel;
+	public TweenParallels TweenParallel { get => _tweenParallel; }
 }

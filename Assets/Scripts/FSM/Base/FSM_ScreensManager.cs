@@ -79,10 +79,12 @@ public abstract class FSM_ScreensManager<EScreen>: MonoBehaviour where EScreen :
     {
         _transitioning = true;
 
-        await ExecuteTransition();
+		_currentScreen.OnExit();
 
-        _currentScreen.OnExit();
+		await ExecuteTransition();
+
         _currentScreen = _screenDict[screenKey];
+
         _currentScreen.OnEnter();
 
         _transitioning = false;

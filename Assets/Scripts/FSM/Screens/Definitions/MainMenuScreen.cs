@@ -20,11 +20,13 @@ public class MainMenuScreen : BaseScreen<ScreensEnum>
 
 	public override async void OnEnter()
 	{
-		if (!_isInit)
+		if (!IsInit)
 		{
 			await InstantiateObjects();
-			_isInit = true;
+			SetInit();
 		}
+
+		SetInteractableButtons(true);
 	}
 
 	public override void OnUpdate()
@@ -34,6 +36,6 @@ public class MainMenuScreen : BaseScreen<ScreensEnum>
 
 	public override void OnExit()
 	{
-		
+		SetInteractableButtons(false);
 	}
 }

@@ -12,8 +12,8 @@ public class DirectionalMovement : BaseTween
 
 public enum MovementDirection
 {
-	MoveLeft,
-	MoveRight,
-	MoveUp,
-	MoveDown
+	MoveLeftToRight,
+	MoveRightToLeft,
+	MoveTopToBottom,
+	MoveBottomToTop
 }
