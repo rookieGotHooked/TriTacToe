@@ -14,4 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _screenEnum: 1
   _screenObject: {fileID: 1723741208261652121, guid: 07e481fedf745004f9ae11a47e36c601, type: 3}
-  _objectGroupsList: []
+  _objectGroupsList:
+  - _groupName: 
+    _objects: []

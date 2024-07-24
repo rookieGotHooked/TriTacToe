@@ -14,4 +14,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _screenEnum: 0
   _screenObject: {fileID: 985041599864786329, guid: a0a28d1b1806f8542a8663b9c027413b, type: 3}
-  _objectGroupsList: []
+  _objectGroupsList:
+  - _groupName: Game Title
+    _objects:
+    - _object: {fileID: 4994182082741353894, guid: c6c86c4d13cb1ec4b94438b06f7d0e71, type: 3}
+      _type: 1
+    - _object: {fileID: 5856406336719543263, guid: 0bf82e6b0db283e4ea1c305d39a523de, type: 3}
+      _type: 0
+    - _object: {fileID: 1200835258133485935, guid: d8d06ace645504c4091a3df2b605448f, type: 3}
+      _type: 0
+  - _groupName: Buttons
+    _objects:
+    - _object: {fileID: 5271881085301608068, guid: 1dd2b8ab1353d6343a6eaf04ead53a3e, type: 3}
+      _type: 0
+    - _object: {fileID: 5735011733444751689, guid: 8d41c2a55fc7751498fb8ef9b49c45fa, type: 3}
+      _type: 0
+    - _object: {fileID: 4847415945507890817, guid: e3008726109f5b546b8fb4f8147a49f4, type: 3}
+      _type: 0
