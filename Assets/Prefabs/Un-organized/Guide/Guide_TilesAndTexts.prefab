@@ -1252,7 +1252,7 @@ GameObject:
   - component: {fileID: 1587697133189016525}
   - component: {fileID: 7611549299131769758}
   m_Layer: 5
-  m_Name: GuideTilesAndTexts
+  m_Name: Guide_TilesAndTexts
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

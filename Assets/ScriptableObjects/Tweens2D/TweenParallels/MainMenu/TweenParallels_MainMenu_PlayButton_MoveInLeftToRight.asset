@@ -13,4 +13,5 @@ MonoBehaviour:
   m_Name: TweenParallels_MainMenu_PlayButton_MoveInLeftToRight
   m_EditorClassIdentifier: 
   tweenGroup: 
-  parallelTweens: []
+  parallelTweens:
+  - {fileID: 11400000, guid: 1a2d9bb718ee79b4ab64a0cd3e1b16d4, type: 2}

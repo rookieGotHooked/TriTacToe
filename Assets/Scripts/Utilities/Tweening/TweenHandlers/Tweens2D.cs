@@ -11,13 +11,15 @@ public class Tweens2D : MonoBehaviour
 	private RectTransform _rectTransform;
 	private readonly Transform _transform;
 	private Image _imageComponent;
+	private bool _isTweening = false;
+	public bool IsTweening { get => _isTweening; }
 
 	[Header("Usage Options")]
 
-	[SerializeField]
-	[Tooltip("Set this component to only calls by functions; all attached tweens 2d scriptable objects will not be used")]
-	private bool _isFunctionCallsOnly;
-	public bool IsFunctionCallsOnly { get => _isFunctionCallsOnly; }
+	//[SerializeField]
+	//[Tooltip("Set this component to only calls by functions; all attached tweens 2d scriptable objects will not be used")]
+	//private bool _isFunctionCallsOnly;
+	//public bool IsFunctionCallsOnly { get => _isFunctionCallsOnly; }
 
 	[SerializeField]
 	[Tooltip("Use anchored position instead of world space position for tweening; will use rectTransform.position by default")]
@@ -52,69 +54,66 @@ public class Tweens2D : MonoBehaviour
 
 	async void Start()
 	{
-		if (!_isFunctionCallsOnly)
-		{
-			await ExecuteTweenOrders();
-		}
+		await ExecuteTweenOrders();
 	}
 
 	#region Internal handler functions
 	private void CheckAndPopulateTweenInitialOrder()
 	{
-		if (_isFunctionCallsOnly && _tweenInitialOrders.Count > 0)
+		//if (_isFunctionCallsOnly && _tweenInitialOrders.Count > 0)
+		//{
+		//	Debug.LogWarning($"{gameObject.name} is set to function calls only while contains existing tween orders; tween orders will be ignored");
+		//}
+		//else if (!_isFunctionCallsOnly && _tweenInitialOrders.Count == 0)
+		//{
+		//	throw new Exception($"Missing values: {gameObject.name} does not have any tween orders and does not set to function calls only");
+		//}
+		//else
+		//{
+		foreach (var item in _tweenInitialOrders)
 		{
-			Debug.LogWarning($"{gameObject.name} is set to function calls only while contains existing tween orders; tween orders will be ignored");
-		}
-		else if (!_isFunctionCallsOnly && _tweenInitialOrders.Count == 0)
-		{
-			throw new Exception($"Missing values: {gameObject.name} does not have any tween orders and does not set to function calls only");
-		}
-		else
-		{
-			foreach (var item in _tweenInitialOrders)
+			int posCount = 0;
+			int scaleCount = 0;
+			int sizeCount = 0;
+			int transparencyCount = 0;
+
+			foreach (var subItem in item.parallelTweens)
 			{
-				int posCount = 0;
-				int scaleCount = 0;
-				int sizeCount = 0;
-				int transparencyCount = 0;
+				TweenTypes subItemTweenType;
 
-				foreach (var subItem in item.parallelTweens)
+				subItemTweenType = subItem switch
 				{
-					TweenTypes subItemTweenType;
+					AbsoluteTween absoluteTween => absoluteTween.tweenType,
+					DirectionalMovement => TweenTypes.Position,
+					SingleFloatTween singleFloatTween => singleFloatTween.tweenType,
+					_ => throw new Exception($"Unexpected values: {subItem.GetType()} is not supported")
+				};
 
-					subItemTweenType = subItem switch
-					{
-						AbsoluteTween absoluteTween => absoluteTween.tweenType,
-						DirectionalMovement => TweenTypes.Position,
-						SingleFloatTween singleFloatTween => singleFloatTween.tweenType,
-						_ => throw new Exception($"Unexpected values: {subItem.GetType()} is not supported")
-					};
-
-					switch (subItemTweenType)
-					{
-						case TweenTypes.Position:
-							posCount++;
-							break;
-						case TweenTypes.Scale:
-							scaleCount++;
-							break;
-						case TweenTypes.CustomSize:
-							sizeCount++;
-							break;
-						case TweenTypes.Transparency:
-							transparencyCount++;
-							break;
-					}
-
-					if (posCount > 1 || scaleCount > 1 || sizeCount > 1 || transparencyCount > 1)
-					{
-						throw new Exception("Invalid data: Multiple calls of the same tween type at the same time is not supported");
-					}
+				switch (subItemTweenType)
+				{
+					case TweenTypes.Position:
+						posCount++;
+						break;
+					case TweenTypes.Scale:
+						scaleCount++;
+						break;
+					case TweenTypes.CustomSize:
+						sizeCount++;
+						break;
+					case TweenTypes.Transparency:
+						transparencyCount++;
+						break;
 				}
 
-				_tweenCleanOrders.Add(item);
+				if (posCount > 1 || scaleCount > 1 || sizeCount > 1 || transparencyCount > 1)
+				{
+					throw new Exception("Invalid data: Multiple calls of the same tween type at the same time is not supported");
+				}
 			}
+
+			_tweenCleanOrders.Add(item);
 		}
+		//}
 	}
 
 	public void CheckAndPopulateRepeatableTweenOrders()
@@ -212,8 +211,8 @@ public class Tweens2D : MonoBehaviour
 
 	async private Task ExecuteTweenOrders()
 	{
-		Debug.Log($"ExecuteTweenOrders: {gameObject.name}");
-		
+		_isTweening = true;
+
 		foreach (var item in _tweenCleanOrders)
 		{
 			List<Task> tweenTask = new();
@@ -238,7 +237,6 @@ public class Tweens2D : MonoBehaviour
 
 						if (subItem is DirectionalMovement movementType)
 						{
-							Debug.Log($"CurrentTweenType: {subItemTweenType}");
 							if (_useAnchoredPosition)
 							{
 								currentPosition = _rectTransform.anchoredPosition;
@@ -276,9 +274,6 @@ public class Tweens2D : MonoBehaviour
 							throw new Exception($"Unexpected movement type detected: {subItem.GetType()}. Expected values are: DirectionalMovement, PositionalMovement");
 						}
 
-						Debug.Log($"currentPosition: {currentPosition}");
-						Debug.Log($"finalPosition: {finalPosition}");
-
 						tweenTask.Add(TweenPosition(currentPosition, finalPosition, subItem.tweenFormula, subItem.duration));
 
 						break;
@@ -298,9 +293,8 @@ public class Tweens2D : MonoBehaviour
 						{
 							throw new Exception($"Unexpected tweening type detected: {subItem.GetType()}. Expected value(s) are: AbsoluteTween");
 						}
-
-						tweenTask.Add(TweenCustomSize(currentScale, finalScale, subItem.tweenFormula, subItem.duration));
 						
+						tweenTask.Add(TweenScale(currentScale, finalScale, subItem.tweenFormula, subItem.duration));
 						break;
 
 					case TweenTypes.CustomSize:
@@ -319,7 +313,7 @@ public class Tweens2D : MonoBehaviour
 							throw new Exception($"Unexpected tweening type detected: {subItem.GetType()}. Expected value(s) are: AbsoluteTween");
 						}
 
-						tweenTask.Add(TweenScale(currentSize, finalSize, subItem.tweenFormula, subItem.duration));
+						tweenTask.Add(TweenCustomSize(currentSize, finalSize, subItem.tweenFormula, subItem.duration));
 						break;
 
 					case TweenTypes.Transparency:
@@ -348,10 +342,14 @@ public class Tweens2D : MonoBehaviour
 				await tween;
 			}
 		}
+
+		_isTweening = false;
 	}
 
-	async public void ExecuteTweenOrders(string orderName)
+	async public Task ExecuteTweenOrders(string orderName)
 	{
+		_isTweening = true;
+
 		if (!_tweenRepeatableDict.ContainsKey(orderName))
 		{
 			throw new Exception($"Received order does not exists; orderName: {orderName}");
@@ -436,7 +434,7 @@ public class Tweens2D : MonoBehaviour
 							throw new Exception($"Unexpected tweening type detected: {item.GetType()}. Expected value(s) are: AbsoluteTween");
 						}
 
-						tweenTask.Add(TweenCustomSize(currentScale, finalScale, item.tweenFormula, item.duration));
+						tweenTask.Add(TweenScale(currentScale, finalScale, item.tweenFormula, item.duration));
 
 						break;
 
@@ -456,7 +454,7 @@ public class Tweens2D : MonoBehaviour
 							throw new Exception($"Unexpected tweening type detected: {item.GetType()}. Expected value(s) are: AbsoluteTween");
 						}
 
-						tweenTask.Add(TweenScale(currentSize, finalSize, item.tweenFormula, item.duration));
+						tweenTask.Add(TweenCustomSize(currentSize, finalSize, item.tweenFormula, item.duration));
 						break;
 
 					case TweenTypes.Transparency:
@@ -485,6 +483,8 @@ public class Tweens2D : MonoBehaviour
 				await task;
 			}
 		}
+
+		_isTweening = false;
 	}
 
 	private bool CheckExternalCalls([CallerMemberName] string callerMemberName = "")
@@ -497,13 +497,13 @@ public class Tweens2D : MonoBehaviour
 	#region Tween functions
 	async public Task TweenPosition(Vector2 currentPosition, Vector2 targetPosition, TweenFormulas tweenFormulas, float duration)
 	{
-		if (!_isFunctionCallsOnly)
-		{
-			if (CheckExternalCalls(nameof(TweenPosition)))
-			{
-				throw new Exception($"{gameObject.name} TweenPosition called when component is not set to function calls only");
-			}
-		}
+		//if (!_isFunctionCallsOnly)
+		//{
+		//	if (CheckExternalCalls(nameof(TweenPosition)))
+		//	{
+		//		throw new Exception($"{gameObject.name} TweenPosition called when component is not set to function calls only");
+		//	}
+		//}
 
 		float elapsedTime = 0f;
 
@@ -545,94 +545,94 @@ public class Tweens2D : MonoBehaviour
 
 	async public Task TweenCustomSize(Vector2 currentSize, Vector2 targetSize, TweenFormulas tweenFormulas, float duration)
 	{
-		if (!_isFunctionCallsOnly)
+		//if (!_isFunctionCallsOnly)
+		//{
+		//	if (CheckExternalCalls(nameof(TweenCustomSize)))
+		//	{
+		//		throw new Exception($"{gameObject.name} TweenCustomSize called when component is not set to function calls only");
+		//	}
+		//}
+		//else
+		//{
+		float elapsedTime = 0f;
+
+		while (elapsedTime < duration)
 		{
-			if (CheckExternalCalls(nameof(TweenCustomSize)))
-			{
-				throw new Exception($"{gameObject.name} TweenCustomSize called when component is not set to function calls only");
-			}
+			float tweenValue = TweenMapping(_tweenDelegate, tweenFormulas, elapsedTime / duration);
+			Vector2 newCustomSize = currentSize + (targetSize - currentSize) * tweenValue;
+
+			_rectTransform.sizeDelta = newCustomSize;
+
+			elapsedTime += Time.deltaTime;
+			await Task.Yield();
 		}
-		else
-		{
-			float elapsedTime = 0f;
 
-			while (elapsedTime < duration)
-			{
-				float tweenValue = TweenMapping(_tweenDelegate, tweenFormulas, elapsedTime / duration);
-				Vector2 newCustomSize = currentSize + (targetSize - currentSize) * tweenValue;
-
-				_rectTransform.sizeDelta = newCustomSize;
-
-				elapsedTime += Time.deltaTime;
-				await Task.Yield();
-			}
-
-			_rectTransform.sizeDelta = targetSize;
-		}
+		_rectTransform.sizeDelta = targetSize;
+		//}
 	}
 
 	async public Task TweenScale(Vector2 currentScale, Vector2 targetScale, TweenFormulas tweenFormulas, float duration)
 	{
-		if (!_isFunctionCallsOnly)
+		//if (!_isFunctionCallsOnly)
+		//{
+		//	if (CheckExternalCalls(nameof(TweenScale)))
+		//	{
+		//		throw new Exception($"{gameObject.name} TweenScale called when component is not set to function calls only");
+		//	}
+		//}
+		//else
+		//{
+		float elapsedTime = 0f;
+
+		while (elapsedTime < duration)
 		{
-			if (CheckExternalCalls(nameof(TweenScale)))
+			float tweenValue = TweenMapping(_tweenDelegate, tweenFormulas, elapsedTime / duration);
+			Vector2 newScale = currentScale + (targetScale - currentScale) * tweenValue;
+
+			if (_rectTransform)
 			{
-				throw new Exception($"{gameObject.name} TweenScale called when component is not set to function calls only");
+				_rectTransform.localScale = newScale;
 			}
-		}
-		else
-		{
-			float elapsedTime = 0f;
-
-			while (elapsedTime < duration)
+			else
 			{
-				float tweenValue = TweenMapping(_tweenDelegate, tweenFormulas, elapsedTime / duration);
-				Vector2 newScale = currentScale + (targetScale - currentScale) * tweenValue;
-
-				if (_rectTransform)
-				{
-					_rectTransform.localScale = newScale;
-				}
-				else
-				{
-					_transform.localScale = newScale;
-				}
-
-				elapsedTime += Time.deltaTime;
-				await Task.Yield();
+				_transform.localScale = newScale;
 			}
 
-			_rectTransform.localScale = targetScale;
+			elapsedTime += Time.deltaTime;
+			await Task.Yield();
 		}
+
+		_rectTransform.localScale = targetScale;
+		//}
 
 	}
 
 	async public Task TweenTransparent(float currentAlpha, float finalAlpha, TweenFormulas tweenFormulas, float duration)
 	{
-		if (!_isFunctionCallsOnly)
-		{
-			if (CheckExternalCalls(nameof(TweenTransparent)))
-			{
-				throw new Exception($"{gameObject.name} TweenTransparent called when component is not set to function calls only");
-			}
-		}
-		else
-		{
-			float elapsedTime = 0f;
+		//if (!_isFunctionCallsOnly)
+		//{
+		//	if (CheckExternalCalls(nameof(TweenTransparent)))
+		//	{
+		//		throw new Exception($"{gameObject.name} TweenTransparent called when component is not set to function calls only");
+		//	}
+		//}
+		//else
+		//{
+		float elapsedTime = 0f;
 
-			while (elapsedTime < duration)
-			{
-				float tweenValue = TweenMapping(_tweenDelegate, tweenFormulas, elapsedTime / duration);
-				float newAlpha = currentAlpha + (finalAlpha - currentAlpha) * tweenValue;
+		while (elapsedTime < duration)
+		{
+			float tweenValue = TweenMapping(_tweenDelegate, tweenFormulas, elapsedTime / duration);
+			float newAlpha = currentAlpha + (finalAlpha - currentAlpha) * tweenValue;
 
-				_imageComponent.color = new Color(_imageComponent.color.r, _imageComponent.color.g, _imageComponent.color.b, newAlpha);
+			_imageComponent.color = new Color(_imageComponent.color.r, _imageComponent.color.g, _imageComponent.color.b, newAlpha);
 				
-				elapsedTime += Time.deltaTime;
-				await Task.Yield();
-			}
-
-			_imageComponent.color = new Color(_imageComponent.color.r, _imageComponent.color.g, _imageComponent.color.b, finalAlpha);
+			elapsedTime += Time.deltaTime;
+			await Task.Yield();
 		}
+
+		_imageComponent.color = new Color(_imageComponent.color.r, _imageComponent.color.g, _imageComponent.color.b, finalAlpha);
+		//}
 	}
 
 	#endregion

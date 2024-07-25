@@ -60,12 +60,12 @@ public abstract class FSM_ScreensManager<EScreen>: MonoBehaviour where EScreen :
 
 	protected virtual void Start()
     {
-        _currentScreen.OnEnter();
+		_currentScreen.OnEnter();
     }
 
     protected virtual void Update()
     {
-        if (!_transitioning && _currentScreen.Equals(_currentScreen.ScreenKey))
+        if (!_transitioning && _nextScreen.Equals(_currentScreen.ScreenKey))
 		{
 			_currentScreen.OnUpdate();
 		}

@@ -9,11 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 13a3dfa25cb0c1f45984f052ee0e4555, type: 3}
-  m_Name: DirectionalMovement_MainMenu_OtherButtons_MoveInLeft
+  m_Script: {fileID: 11500000, guid: 4af101bb93d979e418aa7cd05b05c29c, type: 3}
+  m_Name: TweenParallel_MainMenuGuide_GuideText_MoveInRightToLeft
   m_EditorClassIdentifier: 
-  tweenName: 
-  tweenFormula: 13
-  duration: 0.25
-  direction: 1
-  movementValue: 860
+  tweenGroup: 
+  parallelTweens:
+  - {fileID: 11400000, guid: 69171fd0c17691349885a3b2cf17db5d, type: 2}

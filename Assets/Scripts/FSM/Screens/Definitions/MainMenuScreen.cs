@@ -11,6 +11,11 @@ public class MainMenuScreen : BaseScreen<ScreensEnum>
 		if (screenDefinition != null)
 		{
 			ScreenKey = screenDefinition.ScreenEnum;
+
+			_screenObject = screenDefinition.ScreenObject;
+			_screenDefinition = screenDefinition;
+			_screenCanvasRectTransform = UnityEngine.Object.Instantiate(ScreenObject).GetComponent<RectTransform>();
+			_screenTransitionTween = ScreenObject.GetComponent<Tweens2D>();
 		}
 		else
 		{

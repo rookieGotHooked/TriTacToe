@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5192527186941190120}
   - component: {fileID: 3305430230938302657}
   m_Layer: 0
-  m_Name: SFXLabel
+  m_Name: Settings_SFXLabel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

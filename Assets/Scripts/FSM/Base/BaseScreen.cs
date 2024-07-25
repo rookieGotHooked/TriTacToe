@@ -11,7 +11,9 @@ public abstract class BaseScreen<EScreen>: IState
 	#region Variables and Constructor
 	protected bool _clicked = false;
 
-	public readonly GameObject ScreenObject;
+	protected GameObject _screenObject;
+	public GameObject ScreenObject { get => _screenObject; }
+
 	protected bool _isInit = false;
 	public bool IsInit { get => _isInit; }
 
@@ -29,9 +31,9 @@ public abstract class BaseScreen<EScreen>: IState
 		{
 			ScreenKey = screenDefinition.ScreenEnum;
 
-			ScreenObject = screenDefinition.ScreenObject;
+			_screenObject = screenDefinition.ScreenObject;
 			_screenDefinition = screenDefinition;
-			_screenCanvasRectTransform = ScreenObject.GetComponent<RectTransform>();
+			_screenCanvasRectTransform = UnityEngine.Object.Instantiate(ScreenObject).GetComponent<RectTransform>();
 			_screenTransitionTween = ScreenObject.GetComponent<Tweens2D>();
 		}
 		else
@@ -40,9 +42,11 @@ public abstract class BaseScreen<EScreen>: IState
 		}
 	}
 
-	protected List<GameObject> _buttonsGameObject = new List<GameObject>();
-	protected List<GameObject> _staticSpritesGameObject = new List<GameObject>();
-	protected List<GameObject> _dynamicSpritesGameObject = new List<GameObject>();
+	protected List<GameObject> _buttonsGameObject = new();
+	protected List<GameObject> _staticSpritesGameObject = new();
+	protected List<GameObject> _dynamicSpritesGameObject = new();
+	protected List<GameObject> _slidersGameObject = new();
+	protected List<GameObject> _customGameObject = new();
 	#endregion
 
 
@@ -62,32 +66,45 @@ public abstract class BaseScreen<EScreen>: IState
 
 	async virtual public Task InstantiateObjects()
 	{
+		Debug.Log($"_screenDefinition.ObjectGroupsList.Count: {_screenDefinition.ObjectGroupsList.Count}");
+
 		foreach (var group in _screenDefinition.ObjectGroupsList)
 		{
+			Debug.Log($"group: {group.GroupName}");
+			Debug.Log($"group.Objects.Count: {group.Objects.Count}");
+			//Debug.Log($"group.Count: {}")
+
 			List<Task> transitionTask = new List<Task>();
 
 			foreach (var asset in group.Objects)
 			{
 				GameObject newGameObject = UnityEngine.Object.Instantiate(asset.Object, _screenCanvasRectTransform);
+				transitionTask.Add(AwaitingTransition(newGameObject));
 				ObjectClassification(newGameObject, asset.Type);
 
-				Tweens2D initialTransition;
-
-				if (newGameObject.TryGetComponent(out initialTransition))
-				{
-
-				}
-
-				//if (initialTransition != null && !initialTransition.IsFunctionCallsOnly)
-				//{
-				//	transitionTask.Add(initialTransition.TweenPosition());
-				//}
 			}
 
 			foreach (var task in transitionTask)
 			{
+				Debug.Log("Awaiting...");
 				await task;
 			}
+		}
+	}
+
+	async public Task AwaitingTransition(GameObject gameObject)
+	{
+		Debug.Log("this is reachable");
+
+		if (!gameObject.TryGetComponent(out Tweens2D initialTransition))
+		{
+			throw new Exception($"{gameObject.name} does not contains Tweens2D component.");
+		}
+
+		while (initialTransition.IsTweening)
+		{
+			Debug.Log("Yielding...");
+			await Task.Yield();
 		}
 	}
 
@@ -105,6 +122,14 @@ public abstract class BaseScreen<EScreen>: IState
 
 			case AssetType.DynamicSprite:
 				_dynamicSpritesGameObject.Add(gameObj);
+				break;
+
+			case AssetType.Slider:
+				_slidersGameObject.Add(gameObj);
+				break;
+
+			case AssetType.Custom:
+				_customGameObject.Add(gameObj);
 				break;
 		}
 	}
@@ -247,9 +272,13 @@ public abstract class BaseScreen<EScreen>: IState
 
 	public void SetInteractableButtons(bool value)
 	{
+		Debug.Log(_buttonsGameObject.Count);
+		Debug.Log(_buttonsGameObject);
+
 		foreach (var btn in _buttonsGameObject)
 		{
-			btn.GetComponent<UnityEngine.UI.Button>().interactable = value;
+			Debug.Log(btn);
+			btn.GetComponent<Button>().interactable = value;
 		}
 	}
 }
