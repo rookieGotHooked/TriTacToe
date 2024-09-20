@@ -13,4 +13,5 @@ MonoBehaviour:
   m_Name: TweenParallel_MainMenuGuide_BackButtonBackText_MoveTopToBottom
   m_EditorClassIdentifier: 
   tweenGroup: 
-  parallelTweens: []
+  parallelTweens:
+  - {fileID: 11400000, guid: 8a1f9068a447a434094ead0505f913d8, type: 2}

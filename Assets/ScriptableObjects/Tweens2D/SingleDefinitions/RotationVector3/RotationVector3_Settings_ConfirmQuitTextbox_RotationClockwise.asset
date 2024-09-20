@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b97bec18f6ca5094c9dc68884ebb4ef4, type: 3}
+  m_Name: RotationVector3_Settings_ConfirmQuitTextbox_RotationClockwise
+  m_EditorClassIdentifier: 
+  tweenName: 
+  tweenFormula: 12
+  duration: 0.75
+  isXClockwise: 0
+  isYClockwise: 0
+  isZClockwise: 1
+  xFullRotationTime: 0
+  yFullRotationTime: 0
+  zFullRotationTime: 0
+  additionalRotationValue: {x: 0, y: 0, z: 15}

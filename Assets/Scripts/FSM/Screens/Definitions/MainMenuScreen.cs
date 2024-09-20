@@ -6,41 +6,37 @@ using UnityEngine.Device;
 
 public class MainMenuScreen : BaseScreen<ScreensEnum>
 {
+	ScreenManager _screenManager;
+
 	public MainMenuScreen(ScreenDefinition<ScreensEnum> screenDefinition) : base(screenDefinition)
 	{
-		if (screenDefinition != null)
-		{
-			ScreenKey = screenDefinition.ScreenEnum;
-
-			_screenObject = screenDefinition.ScreenObject;
-			_screenDefinition = screenDefinition;
-			_screenCanvasRectTransform = UnityEngine.Object.Instantiate(ScreenObject).GetComponent<RectTransform>();
-			_screenTransitionTween = ScreenObject.GetComponent<Tweens2D>();
-		}
-		else
-		{
-			throw new Exception($"{GetType().Name} assets is null.");
-		}
 	}
 
-	public override async void OnEnter()
+	public override void OnEnter()
+	{
+		_screenManager = ScreenManager.Instance;
+	}
+
+	async public override void OnUpdate()
 	{
 		if (!IsInit)
 		{
 			await InstantiateObjects();
 			SetInit();
+			AddAndUpdateAudioSources();
 		}
 
-		SetInteractableButtons(true);
-	}
-
-	public override void OnUpdate()
-	{
-		
+		//SetInteractableButtons(true);
 	}
 
 	public override void OnExit()
 	{
-		SetInteractableButtons(false);
+		//SetInteractableButtons(false);
+	}
+
+	public void AddAndUpdateAudioSources()
+	{
+		_screenManager.SoundController.AddAudioSource(AudioType.SFX, GetAllSFXSource());
+		_screenManager.SoundController.UpdateAllSourcesVolume(AudioType.SFX);
 	}
 }

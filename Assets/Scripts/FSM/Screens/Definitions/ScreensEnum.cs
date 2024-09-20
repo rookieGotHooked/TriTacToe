@@ -1,9 +1,7 @@
 public enum ScreensEnum
 {
     MainMenu,
-	MainMenuSettings,
-	MainMenuGuide,
+	Settings,
+	Guide,
 	Gameplay,
-    GameplaySettings,
-    GameplayGuide
 }

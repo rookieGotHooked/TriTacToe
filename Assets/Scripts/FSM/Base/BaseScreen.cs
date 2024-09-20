@@ -21,7 +21,7 @@ public abstract class BaseScreen<EScreen>: IState
 	protected Tweens2D _screenTransitionTween;
 	protected ScreenDefinition<EScreen> _screenDefinition;
 
-	protected List<Func<float, TweenFormulas, float, Task>> _transitionFunctions;
+	//protected List<Func<float, TweenFormulas, float, Task>> _transitionFunctions;
 
 	public EScreen ScreenKey { get; protected set; }
 
@@ -31,10 +31,10 @@ public abstract class BaseScreen<EScreen>: IState
 		{
 			ScreenKey = screenDefinition.ScreenEnum;
 
-			_screenObject = screenDefinition.ScreenObject;
 			_screenDefinition = screenDefinition;
-			_screenCanvasRectTransform = UnityEngine.Object.Instantiate(ScreenObject).GetComponent<RectTransform>();
-			_screenTransitionTween = ScreenObject.GetComponent<Tweens2D>();
+			_screenObject = UnityEngine.Object.Instantiate(screenDefinition.ScreenObject);
+			_screenCanvasRectTransform = _screenObject.GetComponent<RectTransform>();
+			_screenTransitionTween = _screenObject.GetComponent<Tweens2D>();
 		}
 		else
 		{
@@ -66,45 +66,57 @@ public abstract class BaseScreen<EScreen>: IState
 
 	async virtual public Task InstantiateObjects()
 	{
-		Debug.Log($"_screenDefinition.ObjectGroupsList.Count: {_screenDefinition.ObjectGroupsList.Count}");
-
 		foreach (var group in _screenDefinition.ObjectGroupsList)
 		{
-			Debug.Log($"group: {group.GroupName}");
-			Debug.Log($"group.Objects.Count: {group.Objects.Count}");
-			//Debug.Log($"group.Count: {}")
-
 			List<Task> transitionTask = new List<Task>();
 
 			foreach (var asset in group.Objects)
 			{
 				GameObject newGameObject = UnityEngine.Object.Instantiate(asset.Object, _screenCanvasRectTransform);
-				transitionTask.Add(AwaitingTransition(newGameObject));
 				ObjectClassification(newGameObject, asset.Type);
-
+				transitionTask.Add(AwaitingTransition(newGameObject));
 			}
 
 			foreach (var task in transitionTask)
 			{
-				Debug.Log("Awaiting...");
 				await task;
 			}
 		}
 	}
 
-	async public Task AwaitingTransition(GameObject gameObject)
+	public List<AudioSource> GetAllSFXSource()
 	{
-		Debug.Log("this is reachable");
+		List<AudioSource> audioSources = new();
 
-		if (!gameObject.TryGetComponent(out Tweens2D initialTransition))
+		List<GameObject> allGameObjects = new();
+
+		allGameObjects.AddRange(_buttonsGameObject);
+		allGameObjects.AddRange(_staticSpritesGameObject);
+		allGameObjects.AddRange(_dynamicSpritesGameObject);
+		allGameObjects.AddRange(_slidersGameObject);
+		allGameObjects.AddRange(_customGameObject);
+
+		foreach (var gameObj in allGameObjects)
 		{
-			throw new Exception($"{gameObject.name} does not contains Tweens2D component.");
+			AudioSource audioSource;
+
+			if (gameObj.TryGetComponent(out audioSource))
+			{
+				audioSources.Add(audioSource);
+			}
 		}
 
-		while (initialTransition.IsTweening)
+		return audioSources;
+	}
+
+	async public Task AwaitingTransition(GameObject gameObject)
+	{
+		if (gameObject.TryGetComponent(out Tweens2D initialTransition))
 		{
-			Debug.Log("Yielding...");
-			await Task.Yield();
+			while (initialTransition.IsTweening)
+			{
+				await Task.Yield();
+			}
 		}
 	}
 
@@ -272,12 +284,8 @@ public abstract class BaseScreen<EScreen>: IState
 
 	public void SetInteractableButtons(bool value)
 	{
-		Debug.Log(_buttonsGameObject.Count);
-		Debug.Log(_buttonsGameObject);
-
 		foreach (var btn in _buttonsGameObject)
 		{
-			Debug.Log(btn);
 			btn.GetComponent<Button>().interactable = value;
 		}
 	}

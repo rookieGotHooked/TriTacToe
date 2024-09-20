@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4510594188e14054c8d0b82966e8244f, type: 3}
+  m_Name: ScreenDefinitions_SettingsScreen
+  m_EditorClassIdentifier: 
+  _screenEnum: 1
+  _screenObject: {fileID: 7161349924273090814, guid: 07e481fedf745004f9ae11a47e36c601, type: 3}
+  _objectGroupsList:
+  - _groupName: Title
+    _objects:
+    - _object: {fileID: 6287700504629490045, guid: 0ef30fa23e4d3af4ca26c61d70c8e4bb, type: 3}
+      _type: 1
+  - _groupName: Sliders and Labels
+    _objects:
+    - _object: {fileID: 6848278730700176793, guid: c5f3a579a03c0d14dacfc258cfceaca7, type: 3}
+      _type: 3
+    - _object: {fileID: 619184368039771025, guid: 441139bca29ca0946aaf9b52011a01e1, type: 3}
+      _type: 3
+    - _object: {fileID: 3889594268742248076, guid: 68f820863972c0c43a6658a6c553428d, type: 3}
+      _type: 1
+    - _object: {fileID: 6072544216648142758, guid: 25edb06a9023ee147a3cd16db833ab00, type: 3}
+      _type: 1
+  - _groupName: Back Button
+    _objects:
+    - _object: {fileID: 8660605225426859366, guid: a35965aafc12de543abcdd552736ac02, type: 3}
+      _type: 0
+    - _object: {fileID: 8250629059872580957, guid: 13ce831ee435de840ac5ca685604ba5c, type: 3}
+      _type: 0
+    - _object: {fileID: 1517130186619699214, guid: d5169f972aea7d2488265c4baf65e438, type: 3}
+      _type: 0
+  - _groupName: Confirm Quit Textbox
+    _objects:
+    - _object: {fileID: 6395169362304001833, guid: e43983ef07498f1469db31d35cab44fe, type: 3}
+      _type: 1

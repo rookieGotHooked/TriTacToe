@@ -14,25 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   transitionCode: 2
   transitionGroups:
-  - transitionGroupName: Transition out of Main Camera area
+  - transitionGroupName: Parallel Transitions
     transitionList:
-    - transitionName: MainMenu MoveLeft
+    - transitionName: Main Menu Move Right To Left
       screen: 0
-      directionalMovement: {fileID: 11400000, guid: b0ff05681646acb428644aa9b6732ea8, type: 2}
-    - transitionName: MainMenuGuide MoveLeft
-      screen: 2
-      directionalMovement: {fileID: 11400000, guid: b0ff05681646acb428644aa9b6732ea8, type: 2}
-    - transitionName: MainMenuSettings MoveLeft
-      screen: 1
-      directionalMovement: {fileID: 11400000, guid: b0ff05681646acb428644aa9b6732ea8, type: 2}
-  - transitionGroupName: Transition into Main Camera area
-    transitionList:
-    - transitionName: Gameplay MoveLeft
+      directionalMovement: {fileID: 11400000, guid: 93159bab0fc5b5740b2b440f56055481, type: 2}
+      overridenTransitionTime: -1
+    - transitionName: Gameplay Move Right To Left
       screen: 3
-      directionalMovement: {fileID: 11400000, guid: b0ff05681646acb428644aa9b6732ea8, type: 2}
-    - transitionName: GameplaySettings MoveLeft
-      screen: 4
-      directionalMovement: {fileID: 11400000, guid: b0ff05681646acb428644aa9b6732ea8, type: 2}
-    - transitionName: GameplayGuide MoveLeft
-      screen: 5
-      directionalMovement: {fileID: 11400000, guid: b0ff05681646acb428644aa9b6732ea8, type: 2}
+      directionalMovement: {fileID: 11400000, guid: 93159bab0fc5b5740b2b440f56055481, type: 2}
+      overridenTransitionTime: -1

@@ -12,14 +12,14 @@ public class Tweens2D : MonoBehaviour
 	private readonly Transform _transform;
 	private Image _imageComponent;
 	private bool _isTweening = false;
+	private bool _isInit = false;
+
 	public bool IsTweening { get => _isTweening; }
+	public bool IsInit { get => _isInit; }
+	private bool _isDisrupted = false;
+	private List<Task> _tweeningTasks = new();
 
 	[Header("Usage Options")]
-
-	//[SerializeField]
-	//[Tooltip("Set this component to only calls by functions; all attached tweens 2d scriptable objects will not be used")]
-	//private bool _isFunctionCallsOnly;
-	//public bool IsFunctionCallsOnly { get => _isFunctionCallsOnly; }
 
 	[SerializeField]
 	[Tooltip("Use anchored position instead of world space position for tweening; will use rectTransform.position by default")]
@@ -46,6 +46,7 @@ public class Tweens2D : MonoBehaviour
 		{
 			throw new Exception("GameObject does not contains RectTransform component");
 		}
+
 		TryGetComponent(out _imageComponent);
 
 		CheckAndPopulateTweenInitialOrder();
@@ -54,22 +55,15 @@ public class Tweens2D : MonoBehaviour
 
 	async void Start()
 	{
-		await ExecuteTweenOrders();
+		if (_tweenInitialOrders.Count > 0)
+		{
+			await ExecuteTweenOrders();
+		}
 	}
 
 	#region Internal handler functions
 	private void CheckAndPopulateTweenInitialOrder()
 	{
-		//if (_isFunctionCallsOnly && _tweenInitialOrders.Count > 0)
-		//{
-		//	Debug.LogWarning($"{gameObject.name} is set to function calls only while contains existing tween orders; tween orders will be ignored");
-		//}
-		//else if (!_isFunctionCallsOnly && _tweenInitialOrders.Count == 0)
-		//{
-		//	throw new Exception($"Missing values: {gameObject.name} does not have any tween orders and does not set to function calls only");
-		//}
-		//else
-		//{
 		foreach (var item in _tweenInitialOrders)
 		{
 			int posCount = 0;
@@ -83,10 +77,10 @@ public class Tweens2D : MonoBehaviour
 
 				subItemTweenType = subItem switch
 				{
-					AbsoluteTween absoluteTween => absoluteTween.tweenType,
+					AbsoluteTweenVector2 absoluteTweenVector2 => absoluteTweenVector2.tweenType,
 					DirectionalMovement => TweenTypes.Position,
 					SingleFloatTween singleFloatTween => singleFloatTween.tweenType,
-					_ => throw new Exception($"Unexpected values: {subItem.GetType()} is not supported")
+					_ => throw new Exception($"{gameObject.name} - unexpected values: {subItem.GetType()} is not supported")
 				};
 
 				switch (subItemTweenType)
@@ -113,17 +107,17 @@ public class Tweens2D : MonoBehaviour
 
 			_tweenCleanOrders.Add(item);
 		}
-		//}
 	}
 
 	public void CheckAndPopulateRepeatableTweenOrders()
 	{
 		foreach(var item in _tweenRepeatableOrders)
 		{
-			int posCount = 0;
-			int scaleCount = 0;
-			int sizeCount = 0;
-			int transparencyCount = 0;
+			int posCount = 0, 
+				scaleCount = 0,
+				sizeCount = 0, 
+				transparencyCount = 0,
+				rotationCount = 0;
 
 			foreach (var subItem in item.TweenParallel.parallelTweens)
 			{
@@ -131,9 +125,10 @@ public class Tweens2D : MonoBehaviour
 
 				subItemTweenType = subItem switch
 				{
-					AbsoluteTween absoluteTween => absoluteTween.tweenType,
+					AbsoluteTweenVector2 absoluteTweenVector2 => absoluteTweenVector2.tweenType,
 					DirectionalMovement => TweenTypes.Position,
 					SingleFloatTween singleFloatTween => singleFloatTween.tweenType,
+					RotationVector3 rotationVector3 => TweenTypes.Rotation,
 					_ => throw new Exception($"Unexpected values: {subItem.GetType()} is not supported")
 				};
 
@@ -151,9 +146,12 @@ public class Tweens2D : MonoBehaviour
 					case TweenTypes.Transparency:
 						transparencyCount++;
 						break;
+					case TweenTypes.Rotation:
+						rotationCount++;
+						break;
 				}
 
-				if (posCount > 1 || scaleCount > 1 || sizeCount > 1 || transparencyCount > 1)
+				if (posCount > 1 || scaleCount > 1 || sizeCount > 1 || transparencyCount > 1 || rotationCount > 1)
 				{
 					throw new Exception("Invalid data: Multiple calls of the same tween type at the same time is not supported");
 				}
@@ -211,25 +209,44 @@ public class Tweens2D : MonoBehaviour
 
 	async private Task ExecuteTweenOrders()
 	{
-		_isTweening = true;
+		if (!_isTweening)
+		{
+			_isTweening = true;
+		}
+		else
+		{
+			_isDisrupted = true;
+			
+			foreach (var task in _tweeningTasks)
+			{
+				Debug.Log(task.AsyncState);
+				await task;
+			}
+
+			_tweeningTasks.Clear();
+
+			_isDisrupted = false;
+		}
+
+		//Debug.Log($"gameObject: {gameObject}; _isTweening: {IsTweening}");
+		//Debug.Log($"ExecuteTweenOrders: {gameObject.name} - {gameObject.GetHashCode()}");
 
 		foreach (var item in _tweenCleanOrders)
 		{
-			List<Task> tweenTask = new();
-
 			foreach (var subItem in item.parallelTweens)
 			{
 				TweenTypes subItemTweenType;
 
 				subItemTweenType = subItem switch
 				{
-					AbsoluteTween absoluteTween => absoluteTween.tweenType,
+					AbsoluteTweenVector2 absoluteTweenVector2 => absoluteTweenVector2.tweenType,
 					DirectionalMovement => TweenTypes.Position,
 					SingleFloatTween singleFloatTween => singleFloatTween.tweenType,
+					RotationVector3 rotationVector3 => TweenTypes.Rotation,
 					_ => throw new Exception($"Unexpected item type received: {subItem.GetType().Name}; please check the dictionary populate functions")
 				};
 
-				switch (subItemTweenType) 
+				switch (subItemTweenType)
 				{
 					case TweenTypes.Position:
 
@@ -260,11 +277,11 @@ public class Tweens2D : MonoBehaviour
 									=> new Vector2(currentPosition.x, currentPosition.y - temp.movementValue),
 
 								_ => throw new Exception($"Unexpected value detected: {temp.direction}. Expected values are: MoveLeft, MoveRight, MoveUp, MoveDown"),
-							}; 
+							};
 						}
-						else if (subItem is AbsoluteTween positionAbsoluteType)
+						else if (subItem is AbsoluteTweenVector2 positionAbsoluteType)
 						{
-							AbsoluteTween temp = positionAbsoluteType;
+							AbsoluteTweenVector2 temp = positionAbsoluteType;
 
 							currentPosition = temp.finalValue;
 							finalPosition = temp.finalValue;
@@ -274,17 +291,17 @@ public class Tweens2D : MonoBehaviour
 							throw new Exception($"Unexpected movement type detected: {subItem.GetType()}. Expected values are: DirectionalMovement, PositionalMovement");
 						}
 
-						tweenTask.Add(TweenPosition(currentPosition, finalPosition, subItem.tweenFormula, subItem.duration));
+						_tweeningTasks.Add(TweenPosition(currentPosition, finalPosition, subItem.tweenFormula, subItem.duration));
 
 						break;
 
 					case TweenTypes.Scale:
-						
+
 						Vector2 currentScale, finalScale;
 
-						if (subItem is AbsoluteTween scaleAbsoluteType)
+						if (subItem is AbsoluteTweenVector2 scaleAbsoluteType)
 						{
-							AbsoluteTween temp = scaleAbsoluteType;
+							AbsoluteTweenVector2 temp = scaleAbsoluteType;
 
 							currentScale = _rectTransform.localScale;
 							finalScale = temp.finalValue;
@@ -293,17 +310,17 @@ public class Tweens2D : MonoBehaviour
 						{
 							throw new Exception($"Unexpected tweening type detected: {subItem.GetType()}. Expected value(s) are: AbsoluteTween");
 						}
-						
-						tweenTask.Add(TweenScale(currentScale, finalScale, subItem.tweenFormula, subItem.duration));
+
+						_tweeningTasks.Add(TweenScale(currentScale, finalScale, subItem.tweenFormula, subItem.duration));
 						break;
 
 					case TweenTypes.CustomSize:
 
 						Vector2 currentSize, finalSize;
 
-						if (subItem is AbsoluteTween customSizeAbsoluteType)
+						if (subItem is AbsoluteTweenVector2 customSizeAbsoluteType)
 						{
-							AbsoluteTween temp = customSizeAbsoluteType;
+							AbsoluteTweenVector2 temp = customSizeAbsoluteType;
 
 							currentSize = _rectTransform.sizeDelta;
 							finalSize = temp.finalValue;
@@ -313,7 +330,7 @@ public class Tweens2D : MonoBehaviour
 							throw new Exception($"Unexpected tweening type detected: {subItem.GetType()}. Expected value(s) are: AbsoluteTween");
 						}
 
-						tweenTask.Add(TweenCustomSize(currentSize, finalSize, subItem.tweenFormula, subItem.duration));
+						_tweeningTasks.Add(TweenCustomSize(currentSize, finalSize, subItem.tweenFormula, subItem.duration));
 						break;
 
 					case TweenTypes.Transparency:
@@ -332,31 +349,129 @@ public class Tweens2D : MonoBehaviour
 							throw new Exception($"Unexpected tweening type detected: {subItem.GetType()}. Expected value(s) are: SingleFloatTween");
 						}
 
-						tweenTask.Add(TweenTransparent(currentAlpha, finalAlpha, subItem.tweenFormula, subItem.duration));
+						_tweeningTasks.Add(TweenTransparent(currentAlpha, finalAlpha, subItem.tweenFormula, subItem.duration));
 						break;
+
+					case TweenTypes.Rotation:
+
+						Vector3 currentRotation, finalRotation;
+
+						if (subItem is RotationVector3 rotationVector3)
+						{
+							RotationVector3 temp = rotationVector3;
+
+							float simplifiedX = 0f, simplifiedY = 0f, simplifiedZ = 0f,
+								xCoefficiency = 1f, yCoefficiency = 1f, zCoefficiency = 1f;
+
+							currentRotation = _rectTransform.rotation.eulerAngles;
+							finalRotation = temp.additionalRotationValue;
+
+							if (finalRotation.x > 360f || finalRotation.y > 360f || finalRotation.z > 360f ||
+								finalRotation.x < -360f || finalRotation.y < -360f || finalRotation.z < -360f)
+							{
+								Debug.LogWarning($"Final rotation value is currently larger / smaller than expected. " +
+									$"The received value shall be simplified for processing rotation. Current values are: {gameObject.name}: {finalRotation}");
+
+								simplifiedX = finalRotation.x % 360f;
+								simplifiedY = finalRotation.y % 360f;
+								simplifiedZ = finalRotation.z % 360f;
+							}
+							else
+							{
+								simplifiedX = finalRotation.x;
+								simplifiedY = finalRotation.y;
+								simplifiedZ = finalRotation.z;
+							}
+
+							if (temp.isXClockwise)
+							{
+								xCoefficiency = -1f;
+							}
+							if (temp.isYClockwise)
+							{
+								yCoefficiency = -1f;
+							}
+							if (temp.isZClockwise)
+							{
+								zCoefficiency = -1f;
+							}
+
+							if (temp.xFullRotationTime > 0 && simplifiedX > 0f)
+							{
+								finalRotation.x = currentRotation.x + (temp.xFullRotationTime * xCoefficiency * 360f + simplifiedX);
+							}
+							else
+							{
+								finalRotation.x = currentRotation.x + (simplifiedX * xCoefficiency);
+							}
+
+							if (temp.yFullRotationTime > 0 && simplifiedY > 0f)
+							{
+								finalRotation.y = currentRotation.y + (temp.yFullRotationTime * yCoefficiency * 360f + simplifiedY);
+							}
+							else
+							{
+								finalRotation.y = currentRotation.y + (simplifiedY * yCoefficiency);
+							}
+
+							if (temp.zFullRotationTime > 0 && simplifiedZ > 0f)
+							{
+								finalRotation.z = currentRotation.z + (temp.zFullRotationTime * zCoefficiency * 360f + simplifiedZ);
+							}
+							else
+							{
+								finalRotation.z = currentRotation.z + (simplifiedZ * zCoefficiency);
+							}
+						}
+						else
+						{
+							throw new Exception($"Unexpected tweening type detected: {item.GetType()}. Expected value(s) are: RotationVector3");
+						}
+
+						_tweeningTasks.Add(TweenRotation(currentRotation, finalRotation, subItem.tweenFormula, subItem.duration));
+						break;
+
 				}
 			}
 
-			foreach (var tween in tweenTask)
+			foreach (var tween in _tweeningTasks)
 			{
 				await tween;
 			}
 		}
 
+		_tweeningTasks.Clear();
+
 		_isTweening = false;
+		_isDisrupted = false;
+		_isInit = true;
 	}
 
 	async public Task ExecuteTweenOrders(string orderName)
 	{
-		_isTweening = true;
-
 		if (!_tweenRepeatableDict.ContainsKey(orderName))
 		{
-			throw new Exception($"Received order does not exists; orderName: {orderName}");
+			throw new Exception($"Received order does not exists; orderName: {orderName}; gameObject: {gameObject.name}");
 		}
 		else
 		{
-			List<Task> tweenTask = new();
+			if (!_isTweening)
+			{
+				_isTweening = true;
+			}
+			else
+			{
+				_isDisrupted = true;
+
+				foreach (var task in _tweeningTasks)
+				{
+					await task;
+				}
+
+				_tweeningTasks.Clear();
+
+				_isDisrupted = false;
+			}
 
 			foreach (var item in _tweenRepeatableDict[orderName].parallelTweens)
 			{
@@ -364,9 +479,10 @@ public class Tweens2D : MonoBehaviour
 
 				itemTweenType = item switch
 				{
-					AbsoluteTween absoluteTween => absoluteTween.tweenType,
+					AbsoluteTweenVector2 absoluteTweenVector2 => absoluteTweenVector2.tweenType,
 					DirectionalMovement => TweenTypes.Position,
 					SingleFloatTween singleFloatTween => singleFloatTween.tweenType,
+					RotationVector3 rotationVector3 => TweenTypes.Rotation,
 					_ => throw new Exception($"Unexpected item type received: {item.GetType().Name}; please check the dictionary populate functions")
 				};
 
@@ -403,9 +519,9 @@ public class Tweens2D : MonoBehaviour
 								_ => throw new Exception($"Unexpected value detected: {temp.direction}. Expected values are: MoveLeft, MoveRight, MoveUp, MoveDown"),
 							};
 						}
-						else if (item is AbsoluteTween positionAbsoluteType)
+						else if (item is AbsoluteTweenVector2 positionAbsoluteType)
 						{
-							AbsoluteTween temp = positionAbsoluteType;
+							AbsoluteTweenVector2 temp = positionAbsoluteType;
 
 							currentPosition = temp.finalValue;
 							finalPosition = temp.finalValue;
@@ -414,7 +530,7 @@ public class Tweens2D : MonoBehaviour
 						{
 							throw new Exception($"Unexpected movement type detected: {item.GetType()}. Expected values are: DirectionalMovement, PositionalMovement");
 						}
-						tweenTask.Add(TweenPosition(currentPosition, finalPosition, item.tweenFormula, item.duration));
+						_tweeningTasks.Add(TweenPosition(currentPosition, finalPosition, item.tweenFormula, item.duration));
 
 						break;
 
@@ -422,9 +538,9 @@ public class Tweens2D : MonoBehaviour
 
 						Vector2 currentScale, finalScale;
 
-						if (item is AbsoluteTween scaleAbsoluteType)
+						if (item is AbsoluteTweenVector2 scaleAbsoluteType)
 						{
-							AbsoluteTween temp = scaleAbsoluteType;
+							AbsoluteTweenVector2 temp = scaleAbsoluteType;
 
 							currentScale = _rectTransform.localScale;
 							finalScale = temp.finalValue;
@@ -434,7 +550,7 @@ public class Tweens2D : MonoBehaviour
 							throw new Exception($"Unexpected tweening type detected: {item.GetType()}. Expected value(s) are: AbsoluteTween");
 						}
 
-						tweenTask.Add(TweenScale(currentScale, finalScale, item.tweenFormula, item.duration));
+						_tweeningTasks.Add(TweenScale(currentScale, finalScale, item.tweenFormula, item.duration));
 
 						break;
 
@@ -442,9 +558,9 @@ public class Tweens2D : MonoBehaviour
 
 						Vector2 currentSize, finalSize;
 
-						if (item is AbsoluteTween customSizeAbsoluteType)
+						if (item is AbsoluteTweenVector2 customSizeAbsoluteType)
 						{
-							AbsoluteTween temp = customSizeAbsoluteType;
+							AbsoluteTweenVector2 temp = customSizeAbsoluteType;
 
 							currentSize = _rectTransform.sizeDelta;
 							finalSize = temp.finalValue;
@@ -454,7 +570,7 @@ public class Tweens2D : MonoBehaviour
 							throw new Exception($"Unexpected tweening type detected: {item.GetType()}. Expected value(s) are: AbsoluteTween");
 						}
 
-						tweenTask.Add(TweenCustomSize(currentSize, finalSize, item.tweenFormula, item.duration));
+						_tweeningTasks.Add(TweenCustomSize(currentSize, finalSize, item.tweenFormula, item.duration));
 						break;
 
 					case TweenTypes.Transparency:
@@ -473,18 +589,103 @@ public class Tweens2D : MonoBehaviour
 							throw new Exception($"Unexpected tweening type detected: {item.GetType()}. Expected value(s) are: SingleFloatTween");
 						}
 
-						tweenTask.Add(TweenTransparent(currentAlpha, finalAlpha, item.tweenFormula, item.duration));
+						_tweeningTasks.Add(TweenTransparent(currentAlpha, finalAlpha, item.tweenFormula, item.duration));
 						break;
+
+					case TweenTypes.Rotation:
+						Vector3 currentRotation, finalRotation;
+
+						if (item is RotationVector3 rotationVector3)
+						{
+							RotationVector3 temp = rotationVector3;
+
+							float simplifiedX = 0f, simplifiedY = 0f, simplifiedZ = 0f, 
+								xCoefficiency = 1f, yCoefficiency = 1f, zCoefficiency = 1f;
+
+							currentRotation = _rectTransform.rotation.eulerAngles;
+							finalRotation = temp.additionalRotationValue;
+
+							if (finalRotation.x > 360f || finalRotation.y > 360f || finalRotation.z > 360f ||
+								finalRotation.x < -360f || finalRotation.y < -360f || finalRotation.z < -360f)
+							{
+								Debug.LogWarning($"Final rotation value is currently larger / smaller than expected. " +
+									$"The received value shall be simplified for processing rotation. Current values are: {gameObject.name}: {finalRotation}");
+
+								simplifiedX = finalRotation.x % 360f;
+								simplifiedY = finalRotation.y % 360f;
+								simplifiedZ = finalRotation.z % 360f;
+
+							}
+							else
+							{
+								simplifiedX = finalRotation.x; 
+								simplifiedY = finalRotation.y; 
+								simplifiedZ = finalRotation.z;
+							}
+
+							if (temp.isXClockwise)
+							{
+								xCoefficiency = -1f;
+							}
+							if (temp.isYClockwise)
+							{
+								yCoefficiency = -1f;
+							}
+							if (temp.isZClockwise)
+							{
+								zCoefficiency = -1f;
+							}
+
+							if (temp.xFullRotationTime > 0 && simplifiedX > 0f)
+							{
+								finalRotation.x = currentRotation.x + (temp.xFullRotationTime * xCoefficiency * 360f + simplifiedX);
+							}
+							else
+							{
+								finalRotation.x = currentRotation.x + (simplifiedX * xCoefficiency);
+							}
+
+							if (temp.yFullRotationTime > 0 && simplifiedY > 0f)
+							{
+								finalRotation.y = currentRotation.y + (temp.yFullRotationTime * yCoefficiency * 360f + simplifiedY);
+							}
+							else
+							{
+								finalRotation.y = currentRotation.y + (simplifiedY * yCoefficiency);
+							}
+
+							if (temp.zFullRotationTime > 0 && simplifiedZ > 0f)
+							{
+								finalRotation.z = currentRotation.z + (temp.zFullRotationTime * zCoefficiency * 360f + simplifiedZ);
+							}
+							else
+							{
+								finalRotation.z = currentRotation.z + (simplifiedZ * zCoefficiency);
+							}
+						}
+						else
+						{
+							throw new Exception($"Unexpected tweening type detected: {item.GetType()}. Expected value(s) are: RotationVector3");
+						}
+
+						_tweeningTasks.Add(TweenRotation(currentRotation, finalRotation, item.tweenFormula, item.duration));
+						break;
+
+					default:
+						throw new Exception($"Unexpected tween type detected: {itemTweenType}");
 				}
 			}
 
-			foreach (var task in tweenTask)
+			foreach (var task in _tweeningTasks)
 			{
 				await task;
 			}
+
+			_tweeningTasks.Clear();
 		}
 
 		_isTweening = false;
+		_isDisrupted = false;
 	}
 
 	private bool CheckExternalCalls([CallerMemberName] string callerMemberName = "")
@@ -495,31 +696,26 @@ public class Tweens2D : MonoBehaviour
 	#endregion
 
 	#region Tween functions
-	async public Task TweenPosition(Vector2 currentPosition, Vector2 targetPosition, TweenFormulas tweenFormulas, float duration)
+	async public Task TweenPosition(Vector2 currentPosition, Vector2 targetPosition, TweenFormulas tweenFormula, float duration)
 	{
-		//if (!_isFunctionCallsOnly)
-		//{
-		//	if (CheckExternalCalls(nameof(TweenPosition)))
-		//	{
-		//		throw new Exception($"{gameObject.name} TweenPosition called when component is not set to function calls only");
-		//	}
-		//}
+		_isTweening = true;
 
 		float elapsedTime = 0f;
 
-		if (duration <= 0f)
+		if (duration < 0f)
 		{
-			throw new Exception("Invalid value: Duration cannot be equals or smaller than 0.");
+			throw new Exception("Invalid value: Duration cannot be smaller than 0.");
 		}
+
+		//Debug.Log($"GameObject: {gameObject.name}; duration: {duration}");
 
 		while (elapsedTime < duration)
 		{
-
-			float tweenValue = TweenMapping(_tweenDelegate, tweenFormulas, elapsedTime / duration);
-			Vector2 newPosition = currentPosition + (targetPosition - currentPosition) * tweenValue;
-
-			if (_rectTransform)
+			if (!_isDisrupted)
 			{
+				float tweenValue = TweenMapping(_tweenDelegate, tweenFormula, elapsedTime / duration);
+				Vector2 newPosition = currentPosition + (targetPosition - currentPosition) * tweenValue;
+
 				if (_useAnchoredPosition)
 				{
 					_rectTransform.anchoredPosition = newPosition;
@@ -528,11 +724,16 @@ public class Tweens2D : MonoBehaviour
 				{
 					_rectTransform.position = newPosition;
 				}
-			}
 
-			elapsedTime += Time.deltaTime;
-			await Task.Yield();
+				elapsedTime += Time.deltaTime;
+				await Task.Yield();
+			}
+			else
+			{
+				break;
+			}
 		}
+
 		if (_useAnchoredPosition)
 		{
 			_rectTransform.anchoredPosition = targetPosition;
@@ -541,98 +742,171 @@ public class Tweens2D : MonoBehaviour
 		{
 			_rectTransform.position = targetPosition;
 		}
+
+		_isTweening = false;
 	}
 
-	async public Task TweenCustomSize(Vector2 currentSize, Vector2 targetSize, TweenFormulas tweenFormulas, float duration)
+	async public Task TweenCustomSize(Vector2 currentSize, Vector2 targetSize, TweenFormulas tweenFormula, float duration)
 	{
-		//if (!_isFunctionCallsOnly)
-		//{
-		//	if (CheckExternalCalls(nameof(TweenCustomSize)))
-		//	{
-		//		throw new Exception($"{gameObject.name} TweenCustomSize called when component is not set to function calls only");
-		//	}
-		//}
-		//else
-		//{
+		_isTweening = true;
+
 		float elapsedTime = 0f;
 
-		while (elapsedTime < duration)
+		if (duration < 0f)
 		{
-			float tweenValue = TweenMapping(_tweenDelegate, tweenFormulas, elapsedTime / duration);
-			Vector2 newCustomSize = currentSize + (targetSize - currentSize) * tweenValue;
-
-			_rectTransform.sizeDelta = newCustomSize;
-
-			elapsedTime += Time.deltaTime;
-			await Task.Yield();
+			throw new Exception("Invalid value: Duration cannot be smaller than 0.");
 		}
 
-		_rectTransform.sizeDelta = targetSize;
-		//}
-	}
-
-	async public Task TweenScale(Vector2 currentScale, Vector2 targetScale, TweenFormulas tweenFormulas, float duration)
-	{
-		//if (!_isFunctionCallsOnly)
-		//{
-		//	if (CheckExternalCalls(nameof(TweenScale)))
-		//	{
-		//		throw new Exception($"{gameObject.name} TweenScale called when component is not set to function calls only");
-		//	}
-		//}
-		//else
-		//{
-		float elapsedTime = 0f;
-
 		while (elapsedTime < duration)
 		{
-			float tweenValue = TweenMapping(_tweenDelegate, tweenFormulas, elapsedTime / duration);
-			Vector2 newScale = currentScale + (targetScale - currentScale) * tweenValue;
-
-			if (_rectTransform)
+			if (!_isDisrupted)
 			{
-				_rectTransform.localScale = newScale;
+				float tweenValue = TweenMapping(_tweenDelegate, tweenFormula, elapsedTime / duration);
+				Vector2 newCustomSize = currentSize + (targetSize - currentSize) * tweenValue;
+
+				_rectTransform.sizeDelta = newCustomSize;
+
+				elapsedTime += Time.deltaTime;
+				await Task.Yield();
 			}
 			else
 			{
-				_transform.localScale = newScale;
+				break;
 			}
-
-			elapsedTime += Time.deltaTime;
-			await Task.Yield();
 		}
 
-		_rectTransform.localScale = targetScale;
-		//}
+		_rectTransform.sizeDelta = targetSize;
 
+		_isTweening = false;
 	}
 
-	async public Task TweenTransparent(float currentAlpha, float finalAlpha, TweenFormulas tweenFormulas, float duration)
+	async public Task TweenScale(Vector2 currentScale, Vector2 targetScale, TweenFormulas tweenFormula, float duration)
 	{
-		//if (!_isFunctionCallsOnly)
-		//{
-		//	if (CheckExternalCalls(nameof(TweenTransparent)))
-		//	{
-		//		throw new Exception($"{gameObject.name} TweenTransparent called when component is not set to function calls only");
-		//	}
-		//}
-		//else
-		//{
+		_isTweening = true;
+
 		float elapsedTime = 0f;
+
+		if (duration < 0f)
+		{
+			throw new Exception("Invalid value: Duration cannot be smaller than 0.");
+		}
 
 		while (elapsedTime < duration)
 		{
-			float tweenValue = TweenMapping(_tweenDelegate, tweenFormulas, elapsedTime / duration);
-			float newAlpha = currentAlpha + (finalAlpha - currentAlpha) * tweenValue;
+			if (!_isDisrupted)
+			{
+				float tweenValue = TweenMapping(_tweenDelegate, tweenFormula, elapsedTime / duration);
+				Vector2 newScale = currentScale + (targetScale - currentScale) * tweenValue;
 
-			_imageComponent.color = new Color(_imageComponent.color.r, _imageComponent.color.g, _imageComponent.color.b, newAlpha);
-				
-			elapsedTime += Time.deltaTime;
-			await Task.Yield();
+				if (_rectTransform)
+				{
+					_rectTransform.localScale = newScale;
+				}
+				else
+				{
+					_transform.localScale = newScale;
+				}
+
+				elapsedTime += Time.deltaTime;
+				await Task.Yield();
+			}
+			else
+			{
+				break;
+			}
+		}
+
+		_rectTransform.localScale = targetScale;
+
+		_isTweening = false;
+	}
+
+	async public Task TweenTransparent(float currentAlpha, float finalAlpha, TweenFormulas tweenFormula, float duration)
+	{
+		_isTweening = true;
+
+		float elapsedTime = 0f;
+
+		if (duration < 0f)
+		{
+			throw new Exception("Invalid value: Duration cannot be smaller than 0.");
+		}
+
+		while (elapsedTime < duration)
+		{
+			if (!_isDisrupted)
+			{
+				float tweenValue = TweenMapping(_tweenDelegate, tweenFormula, elapsedTime / duration);
+				float newAlpha = currentAlpha + (finalAlpha - currentAlpha) * tweenValue;
+
+				_imageComponent.color = new Color(_imageComponent.color.r, _imageComponent.color.g, _imageComponent.color.b, newAlpha);
+
+				//Debug.Log($"{gameObject.name} newAlpha: {newAlpha}");
+
+				elapsedTime += Time.deltaTime;
+				await Task.Yield();
+			}
+			else
+			{
+				break;
+			}
 		}
 
 		_imageComponent.color = new Color(_imageComponent.color.r, _imageComponent.color.g, _imageComponent.color.b, finalAlpha);
-		//}
+
+		_isTweening = false;
+	}
+
+	async public Task TweenRotation(Vector3 currentRotation, Vector3 finalRotation, TweenFormulas tweenFormula, float duration)
+	{
+		_isTweening = true;
+
+		float elapsedTime = 0f;
+
+		if (duration < 0f)
+		{
+			throw new Exception("Invalid value: Duration cannot be smaller than 0.");
+		}
+
+		while (elapsedTime < duration)
+		{
+			if (!_isDisrupted)
+			{
+				float tweenValue = TweenMapping(_tweenDelegate, tweenFormula, elapsedTime / duration);
+				Vector3 newRotation = currentRotation + (finalRotation - currentRotation) * tweenValue;
+
+				//Debug.Log($"newRotation: {newRotation}");
+
+				Quaternion newQuaternion = Quaternion.Euler(newRotation);
+
+				_rectTransform.rotation = newQuaternion;
+
+				elapsedTime += Time.deltaTime;
+				await Task.Yield();
+			}
+			else
+			{
+				break;
+			}
+		}
+
+		_rectTransform.rotation = Quaternion.Euler(finalRotation);
+
+		_isTweening = false;
+	}
+
+	async public Task ManualDisrupt()
+	{
+		_isDisrupted = true;
+
+		foreach (var task in _tweeningTasks)
+		{
+			await task;
+		}
+
+		_tweeningTasks.Clear();
+
+		_isDisrupted = false;
 	}
 
 	#endregion

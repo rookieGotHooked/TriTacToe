@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &969285041449925394
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7478018038382522364}
+  - component: {fileID: 3503329023116463685}
+  m_Layer: 5
+  m_Name: GameplayGuide_PageManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &7478018038382522364
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 969285041449925394}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &3503329023116463685
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 969285041449925394}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61433247455554844ae0dd2a4e596f7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _tilesPrefab:
+  - _positionIndex: 0
+    _tileGameObject: {fileID: 7422806324818600012, guid: 11600fe158e5dbe4f9e66cf4d24166e9, type: 3}
+  - _positionIndex: 1
+    _tileGameObject: {fileID: 1007808757278975117, guid: 8d3b1ab17d12bfa4c8d50d02e1a7d14e, type: 3}
+  - _positionIndex: 2
+    _tileGameObject: {fileID: 512886812974208737, guid: 83eb4d7e75af35344830b08c8f8d65a6, type: 3}
+  - _positionIndex: 3
+    _tileGameObject: {fileID: 1226323446194081807, guid: 391396721dc1af742a770d139c8e9a99, type: 3}
+  - _positionIndex: 4
+    _tileGameObject: {fileID: 8491911223676180005, guid: fbd408fcc1ec679439271ac463c4cdd4, type: 3}
+  - _positionIndex: 5
+    _tileGameObject: {fileID: 6603832421033431959, guid: 18c72eda397936c4ea2f7c6f09b97979, type: 3}
+  - _positionIndex: 6
+    _tileGameObject: {fileID: 7992384327015049975, guid: b43f7644b66d5984f84a44af3b1c97f8, type: 3}
+  - _positionIndex: 7
+    _tileGameObject: {fileID: 3842738686888913996, guid: 15f98c0d67deb4c4b8b73504d7c8b019, type: 3}
+  - _positionIndex: 8
+    _tileGameObject: {fileID: 3008037444687121824, guid: 95483be7e5476bc4c824a75c63fe0b6f, type: 3}
+  _guideTextPrefab: {fileID: 1697625228240572632, guid: 16e970df4e7e6fc43b9fa2c0a5c7d343, type: 3}
+  _backMenuButtonPrefab: {fileID: 4533669130410416153, guid: 97fc9359029ac9b4e8c8f61e75a759b9, type: 3}
+  _nextButtonPrefab: {fileID: 970976356969670339, guid: 2712b87ee05eaee43b9c4557742e0c82, type: 3}
+  _hintButtonPrefab: {fileID: 3506111448510113201, guid: c787dbf700680d549a12dfd382810364, type: 3}
+  _textboxHintPrefab: {fileID: 7129514168951169182, guid: 473016d1219f1f5428fe004892dc8c55, type: 3}
+  _screenObject: {fileID: 969285041449925394}

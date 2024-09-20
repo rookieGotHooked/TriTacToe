@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tweenName: 
   tweenFormula: 13
-  duration: 0.25
+  duration: 0.5
   tweenType: 2
   initialValue: {x: 0, y: 0}
   finalValue: {x: 240, y: 240}

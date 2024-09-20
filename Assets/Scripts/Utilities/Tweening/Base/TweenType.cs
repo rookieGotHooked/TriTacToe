@@ -3,5 +3,6 @@ public enum TweenTypes
 	Position,
 	Scale,
 	CustomSize,
-	Transparency
+	Transparency,
+	Rotation
 }

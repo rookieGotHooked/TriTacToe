@@ -15,5 +15,5 @@ MonoBehaviour:
   tweenName: 
   tweenFormula: 13
   duration: 0.5
-  direction: 1
-  movementValue: 860
+  direction: 0
+  movementValue: 900

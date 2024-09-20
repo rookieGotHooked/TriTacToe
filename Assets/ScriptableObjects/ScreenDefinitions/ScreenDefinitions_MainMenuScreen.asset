@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4510594188e14054c8d0b82966e8244f, type: 3}
+  m_Name: ScreenDefinitions_MainMenuScreen
+  m_EditorClassIdentifier: 
+  _screenEnum: 0
+  _screenObject: {fileID: 2176091343137415535, guid: a0a28d1b1806f8542a8663b9c027413b, type: 3}
+  _objectGroupsList:
+  - _groupName: Game Title
+    _objects:
+    - _object: {fileID: 4994182082741353894, guid: c6c86c4d13cb1ec4b94438b06f7d0e71, type: 3}
+      _type: 1
+    - _object: {fileID: 5856406336719543263, guid: 0bf82e6b0db283e4ea1c305d39a523de, type: 3}
+      _type: 1
+    - _object: {fileID: 1200835258133485935, guid: d8d06ace645504c4091a3df2b605448f, type: 3}
+      _type: 1
+  - _groupName: Buttons
+    _objects:
+    - _object: {fileID: 2802708980410286637, guid: da9c8dd9af64fcd458d11c59c8cfdd8e, type: 3}
+      _type: 0
+    - _object: {fileID: 3554947654278404179, guid: e4aba72297e4b33468b8b0ce671017fb, type: 3}
+      _type: 0
+    - _object: {fileID: 5735011733444751689, guid: 8d41c2a55fc7751498fb8ef9b49c45fa, type: 3}
+      _type: 0
+    - _object: {fileID: 4847415945507890817, guid: e3008726109f5b546b8fb4f8147a49f4, type: 3}
+      _type: 0

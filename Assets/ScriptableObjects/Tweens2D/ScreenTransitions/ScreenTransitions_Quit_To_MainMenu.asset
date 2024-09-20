@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7aa37b21ab478fd4cac5655cedfd6c33, type: 3}
+  m_Name: ScreenTransitions_Quit_To_MainMenu
+  m_EditorClassIdentifier: 
+  transitionCode: 10
+  transitionGroups:
+  - transitionGroupName: Adjustment Behind the Scene
+    transitionList:
+    - transitionName: Main Menu Move Left To Right
+      screen: 0
+      directionalMovement: {fileID: 11400000, guid: b0ff05681646acb428644aa9b6732ea8, type: 2}
+      overridenTransitionTime: 0
+    - transitionName: Main Menu Move Top To Bottom
+      screen: 0
+      directionalMovement: {fileID: 11400000, guid: 94a5836edd472c340890efe5e9ef1415, type: 2}
+      overridenTransitionTime: 0
+    - transitionName: Gameplay Move Left To Right
+      screen: 3
+      directionalMovement: {fileID: 11400000, guid: b0ff05681646acb428644aa9b6732ea8, type: 2}
+      overridenTransitionTime: 0
+  - transitionGroupName: Transition within Main Camera area
+    transitionList:
+    - transitionName: Main Menu Move Bottom To Top
+      screen: 0
+      directionalMovement: {fileID: 11400000, guid: bfb64e172f9da4345a4a9a42bc505a02, type: 2}
+      overridenTransitionTime: -1
+    - transitionName: Settings Move Bottom To Top
+      screen: 1
+      directionalMovement: {fileID: 11400000, guid: bfb64e172f9da4345a4a9a42bc505a02, type: 2}
+      overridenTransitionTime: -1
+  - transitionGroupName: Transition outside of Main Camera area
+    transitionList:
+    - transitionName: Guide Move Bottom To Top
+      screen: 2
+      directionalMovement: {fileID: 11400000, guid: bfb64e172f9da4345a4a9a42bc505a02, type: 2}
+      overridenTransitionTime: 0
+    - transitionName: Gameplay Move Bottom To Top
+      screen: 3
+      directionalMovement: {fileID: 11400000, guid: bfb64e172f9da4345a4a9a42bc505a02, type: 2}
+      overridenTransitionTime: 0

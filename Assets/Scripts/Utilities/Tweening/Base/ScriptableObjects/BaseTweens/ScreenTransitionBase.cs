@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using UnityEngine;
 using UnityEngine.Device;
 public class ScreenTransitionBase<EScreen> : ScriptableObject
@@ -8,24 +9,26 @@ public class ScreenTransitionBase<EScreen> : ScriptableObject
 {
     public ScreenTransitionCode transitionCode;
     public List<ScreenTransitionGroup<EScreen>> transitionGroups;
+    //public float overridenTime;
 }
 
 public enum ScreenTransitionCode
 {
-    MainMenuToMainMenuSettings,
-    MainMenuToMainMenuGuide,
+    MainMenuToGuide,
+    MainMenuToSettings,
     MainMenuToGameplay,
 
+    GuideToMainMenu,
+    GuideToGameplay,
+    
+    SettingsToGameplay,
+    SettingsToMainMenu,
+
     GameplayToMainMenu,
-    GameplayToGameplayGuide,
-	GameplayToGameplaySettings,
+    GameplayToSettings,
+    GameplayToGuide,
 
-    MainMenuSettingsToMainMenu,
-    MainMenuGuideToMainMenu,
-
-    GameplayGuideToGameplay,
-    GameplaySettingsToGameplay,
-    GameplaySettingsToMainMenu
+    QuitToMainMenu
 }
 
 
@@ -45,4 +48,8 @@ public class SingleTransition<EScreen>
     public string transitionName;
     public EScreen screen;
     public DirectionalMovement directionalMovement;
+    [Tooltip("Override the transition time within the transition ScriptableObject;\n" +
+        "If the value is larger or equal to 0, transition time in the DirectionalMovement ScriptableObject would be override; " +
+        "otherwise, no overriden would occur.")]
+    public float overridenTransitionTime;
 }

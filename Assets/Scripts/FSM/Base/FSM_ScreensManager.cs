@@ -7,35 +7,18 @@ using UnityEngine.UI;
 
 public abstract class FSM_ScreensManager<EScreen>: MonoBehaviour where EScreen : Enum
 {
-	#region Base Singleton
-	protected FSM_ScreensManager<EScreen> _instance;
-    public FSM_ScreensManager<EScreen> Instance
-    {
-        get
-        {
-            if (_instance == null)
-            {
-                _instance = FindAnyObjectByType<FSM_ScreensManager<EScreen>>();
-
-                if (_instance == null)
-                {
-                    GameObject tempObj = new GameObject("ScreenManager");
-                    tempObj.AddComponent<FSM_ScreensManager<EScreen>>();
-                }
-            }
-
-            return _instance;
-        }
-    }
-	#endregion
-
-	#region Protected screen definitions and variables
+    #region Protected screen definitions and variables
+    protected SoundController _soundController;
+    public SoundController SoundController => _soundController;
 	protected BaseScreen<EScreen> _currentScreen;
 	protected EScreen _nextScreen;
+    protected EScreen _previousScreen;
+    public EScreen PreviousScreen { get => _previousScreen; }
     protected ScreenTransitionCode _currentTransitionCode;
 
 	protected List<BaseScreen<EScreen>> _screensList;
 	protected Dictionary<EScreen, BaseScreen<EScreen>> _screenDict = new Dictionary<EScreen, BaseScreen<EScreen>>();
+    public Dictionary<EScreen, BaseScreen<EScreen>> ScreenDict => _screenDict;
     protected Dictionary<EScreen, ScreenDefinition<EScreen>> _screenDefinitionDict = new Dictionary<EScreen, ScreenDefinition<EScreen>>();
     protected Dictionary<ScreenTransitionCode, List<ScreenTransitionGroup<EScreen>>> _transitionDict = new Dictionary<ScreenTransitionCode, List<ScreenTransitionGroup<EScreen>>>();
 	#endregion
@@ -54,7 +37,15 @@ public abstract class FSM_ScreensManager<EScreen>: MonoBehaviour where EScreen :
 
 	protected virtual void Awake()
 	{
+        Application.targetFrameRate = 60;
+
+		if (!TryGetComponent(out _soundController))
+        {
+            throw new Exception($"{gameObject.name} does not contains SoundController component.");
+        }
+
         PopuplateAssetDict();
+        PopulateTransitionDict();
         AddScreens();
 	}
 
@@ -81,13 +72,13 @@ public abstract class FSM_ScreensManager<EScreen>: MonoBehaviour where EScreen :
 
 		_currentScreen.OnExit();
 
-		await ExecuteTransition();
-
         _currentScreen = _screenDict[screenKey];
 
         _currentScreen.OnEnter();
 
-        _transitioning = false;
+		await ExecuteTransition();
+
+		_transitioning = false;
     }
 
     protected virtual void AddScreens()
@@ -108,13 +99,14 @@ public abstract class FSM_ScreensManager<EScreen>: MonoBehaviour where EScreen :
         }
     }
 
-    protected virtual void SetNextScreen(EScreen eScreen, ScreenTransitionCode transitionCode)
+    public virtual void SetNextScreen(EScreen eScreen, ScreenTransitionCode transitionCode)
     {
         if (_screenDict.ContainsKey(eScreen))
-		{
-			_nextScreen = eScreen;
-			_currentTransitionCode = transitionCode;
-		}
+        {
+            _previousScreen = _currentScreen.ScreenKey;
+            _nextScreen = eScreen;
+            _currentTransitionCode = transitionCode;
+        }
         else
         {
             throw new Exception($"Unexpected value: Undefined screen detected - {eScreen}");
@@ -156,12 +148,23 @@ public abstract class FSM_ScreensManager<EScreen>: MonoBehaviour where EScreen :
 
                 foreach (var singleTransition in transitionGroup.transitionList)
                 {
+                    float duration;
+
+                    if (singleTransition.overridenTransitionTime >= 0)
+                    {
+                        duration = singleTransition.overridenTransitionTime;
+                    }
+                    else
+                    {
+                        duration = singleTransition.directionalMovement.duration;
+					}
+
                     transitionTask.Add(
                         _screenDict[singleTransition.screen].TransitionMapping(
                             singleTransition.directionalMovement.direction,
                             singleTransition.directionalMovement.movementValue, 
-                            singleTransition.directionalMovement.tweenFormula, 
-                            singleTransition.directionalMovement.duration));
+                            singleTransition.directionalMovement.tweenFormula,
+							duration));
                 }
 
                 foreach (var task in transitionTask)
@@ -172,7 +175,7 @@ public abstract class FSM_ScreensManager<EScreen>: MonoBehaviour where EScreen :
         }
         else
         {
-            throw new Exception($"Unexpected value: Unknown key received {_currentTransitionCode}");
+            throw new Exception($"Unexpected value: Unknown key received: {_currentTransitionCode}");
         }
 	}
 }

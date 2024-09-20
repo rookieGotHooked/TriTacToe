@@ -25,14 +25,14 @@ public class TileButtonController : MonoBehaviour
 		
 	}
 
-	async public Task ExecuteMarkSymbol(Symbol symbol)
-	{
-		//await Task.Yield();
-		throw new System.NotImplementedException();
-	}
+	//async public Task ExecuteMarkSymbol(Symbol symbol)
+	//{
+	//	//await Task.Yield();
+	//	throw new System.NotImplementedException();
+	//}
 }
 
 public enum Symbol
 {
-	X, O
+	X, O, None
 }
