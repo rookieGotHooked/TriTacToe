@@ -9,12 +9,17 @@ The tic-tac-toe game now comes with a twist! (made entirely for learning purpose
 - Reach 3 points first to win.
 
 ## 2. Game (currently) includes:
-- Local 2P: Player versus Player.
-- Versus AI: Player versus AI.
+- 2 game modes:
+  + Local 2P: Player versus Player.
+  + Versus AI: Player versus AI.
 - 3 difficulties for versus AI:
-  +) Random: AI mark tiles randomly on the board.
-  +) Normal: Basic AI prioritize on defense.
-  +) Hard: Improved AI, marking tiles base on tile scoring.
+  + Random: AI mark tiles randomly on the board.
+  + Normal: Basic AI prioritize on defense.
+  + Hard: Improved AI, marking tiles base on tile scoring:
+    * Block move = 0.75f (for blocking any three-in-a-row; blocking n number of three-in-a-row would yield result as n * 0.75f)
+    *	Score move = 1f (for make a three-in-a-row; a move in which creates more than 1 three-in-a-row would yield result as n * 1)
+    *	Create move = 0.45f (for moves that would create a two-in-a-row - with an empty tile)
+    *	Filler move = 0.25f (intended for moves that would just fill the empty tile of the board; actually not needed after careful consideration - but not refactored yet).
 - Game animations / transitions.
 - Sound effects on UI interactions.
 
