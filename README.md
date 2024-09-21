@@ -27,8 +27,18 @@ The tic-tac-toe game now comes with a twist! (made entirely for learning purpose
 - Long-duration UI animations may cause frustration due to excessive waiting time.
 - Color-change of button between interactable and non-interactable also cause frustration in interaction.
 - Some button have hidden function that the player cannot (and would not) notice right away.
-- Only support 2340x1080 resolution; does not support other resolution (and possibly cause weird screen transitions).
+- Only support 2340x1080 resolution; does not support other resolution (and possibly causing weird screen transitions in other resolutions).
 - SFX Bug - SFX volume does not change on SFX volume slider value change in Settings.
 - No BGM yet.
 - Project still cluttered with unused classes and assets / prefab (no project-refactoring yet).
 - Some game UIs / assets got pixelated due to import choices.
+
+## 4. Others:
+
+- Here is the UI designs (I create it myself - and it's a mess! Do notes that this is view-only):
+
+``` 
+https://www.figma.com/design/ziJJo5gkpCChhJkaQ2fLFW/TicTacToe?node-id=479-89&t=gYVdEwvZP92pqICs-1
+```
+
+- Please contact me with this email if you have any questions: tlunguyendat@gmail.com
