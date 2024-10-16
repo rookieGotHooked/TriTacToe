@@ -1,9 +1,6 @@
-using System.Collections;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using UnityEngine;
-using Unity.VisualScripting.Dependencies.NCalc;
-using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -55,6 +52,13 @@ public class GameManager : MonoBehaviour
 
 	private bool _isGameEnd = false;
 	public bool IsGameEnd { get { return _isGameEnd; } set {_isGameEnd = value; } }
+
+	[Header("SFX")]
+	[SerializeField] AudioSource _scoreSFX;
+	public AudioSource ScoreSFX => _scoreSFX;
+	[SerializeField] AudioSource _clearSFX;
+
+	[Header("Prefabs")]
 
 	#region AI Configs
 
@@ -636,166 +640,152 @@ public class GameManager : MonoBehaviour
 		_currentGameMode = mode;
 	}
 
-	async public void UpdateScore(int scoreChange)
+	async public void UpdateScore(int xScoreChange, int oScoreChange)
     {
-		ScoreDisplayController scoreDisplayController;
+		List<Task> tweenTask = new();
 
-		if (_currentSymbol == Symbol.X)
+		if (xScoreChange == 1)
 		{
-			scoreDisplayController = _scoreXDisplayController;
+			if (_xScore < 3 && _xScore >= 0)
+			{
+				_xScore += xScoreChange;
+
+				if (_xScore == 2)
+				{
+					tweenTask.Add(_scoreXDisplayController.HighlighAppear());
+				}
+
+				tweenTask.Add(_scoreXDisplayController.MoveTextUp(xScoreChange));
+			}
+			else
+			{
+				throw new System.Exception($"Invalid _xScore detected: {_xScore}");
+			}
 		}
-		else if (_currentSymbol == Symbol.O)
+		else if (xScoreChange == 2)
 		{
-			scoreDisplayController = _scoreODisplayController;
+			if (_xScore == 0 || _xScore == 1)
+			{
+				_xScore += xScoreChange;
+
+				tweenTask.Add(_scoreXDisplayController.HighlighAppear());
+				tweenTask.Add(_scoreXDisplayController.MoveTextUp(xScoreChange));
+			}
+			else if (_xScore == 2)
+			{
+				_xScore += 1;
+				tweenTask.Add(_scoreXDisplayController.MoveTextUp(1));
+			}
+			else
+			{
+				throw new System.Exception($"Invalid _xScore detected: {_xScore}");
+			}
+		}
+		else if (xScoreChange == 3)
+		{
+			if (_xScore == 0)
+			{
+				_xScore += xScoreChange;
+
+				tweenTask.Add(_scoreXDisplayController.HighlighAppear());
+				tweenTask.Add(_scoreXDisplayController.MoveTextUp(xScoreChange));
+			}
+			else if (_xScore == 1)
+			{
+				_xScore += 2;
+
+				tweenTask.Add(_scoreXDisplayController.HighlighAppear());
+				tweenTask.Add(_scoreXDisplayController.MoveTextUp(2));
+			}
+			else if (_xScore == 2)
+			{
+				_xScore += 1;
+
+				tweenTask.Add(_scoreXDisplayController.MoveTextUp(1));
+			}
+			else
+			{
+				throw new System.Exception($"Invalid _xScore detected: {_xScore}");
+			}
 		}
 		else
 		{
-			throw new System.Exception($"Unexpected symbol detected: {_currentSymbol}");
+			if (xScoreChange != 0)
+			{
+				throw new System.Exception($"Invalid xScoreChange: {xScoreChange}");
+			}
 		}
 
-		List<Task> tweenTask = new();
-
-		switch (scoreChange)
+		if (oScoreChange == 1)
 		{
-			case 1:
-				if (_currentSymbol == Symbol.X)
+			if (_oScore < 3 && _oScore >= 0)
+			{
+				_oScore += oScoreChange;
+
+				if (_oScore == 2)
 				{
-					if (_xScore < 3 && _xScore >= 0)
-					{
-						_xScore += scoreChange;
-
-						if (_xScore == 2) 
-						{
-							tweenTask.Add(scoreDisplayController.HighlighAppear());
-						}
-
-						tweenTask.Add(scoreDisplayController.MoveTextUp(scoreChange));
-					}
-					else
-					{
-						throw new System.Exception($"Invalid _xScore detected: {_xScore}");
-					}
+					tweenTask.Add(_scoreODisplayController.HighlighAppear());
 				}
-				else
-				{
-					if (_oScore < 3 && _oScore >= 0)
-					{
-						_oScore += scoreChange;
 
-						if (_oScore == 2)
-						{
-							tweenTask.Add(scoreDisplayController.HighlighAppear());
-						}
+				tweenTask.Add(_scoreODisplayController.MoveTextUp(oScoreChange));
+			}
+			else
+			{
+				throw new System.Exception($"Invalid _oScore detected: {_oScore}");
+			}
+		}
+		else if (oScoreChange == 2)
+		{
+			if (_oScore == 0 || _oScore == 1)
+			{
+				_oScore += oScoreChange;
 
-						tweenTask.Add(scoreDisplayController.MoveTextUp(scoreChange));
-					}
-					else
-					{
-						throw new System.Exception($"Invalid _oScore detected: {_oScore}");
-					}
-				}
-				break;
+				tweenTask.Add(_scoreODisplayController.HighlighAppear());
+				tweenTask.Add(_scoreODisplayController.MoveTextUp(oScoreChange));
+			}
+			else if (_oScore == 2)
+			{
+				_oScore += 1;
+				tweenTask.Add(_scoreODisplayController.MoveTextUp(1));
+			}
+			else
+			{
+				throw new System.Exception($"Invalid _xScore detected: {_oScore}");
+			}
+		}
+		else if (oScoreChange == 3)
+		{
+			if (_oScore == 0)
+			{
+				_oScore += oScoreChange;
 
-			case 2:
-				if (_currentSymbol == Symbol.X)
-				{
-					if (_xScore == 0 || _xScore == 1)
-					{
-						_xScore += scoreChange;
+				tweenTask.Add(_scoreODisplayController.HighlighAppear());
+				tweenTask.Add(_scoreODisplayController.MoveTextUp(oScoreChange));
+			}
+			else if (_oScore == 1)
+			{
+				_oScore += 2;
 
-						tweenTask.Add(scoreDisplayController.HighlighAppear());
-						tweenTask.Add(scoreDisplayController.MoveTextUp(scoreChange));
-					}
-					else if (_xScore == 2)
-					{
-						_xScore += 1;
-						tweenTask.Add(scoreDisplayController.MoveTextUp(1));
-					}
-					else
-					{
-						throw new System.Exception($"Invalid _xScore detected: {_xScore}");
-					}
-				}
-				else
-				{
-					if (_oScore == 0 || _oScore == 1)
-					{
-						_oScore += scoreChange;
+				tweenTask.Add(_scoreODisplayController.HighlighAppear());
+				tweenTask.Add(_scoreODisplayController.MoveTextUp(2));
+			}
+			else if (_oScore == 2)
+			{
+				_oScore += 1;
 
-						tweenTask.Add(scoreDisplayController.HighlighAppear());
-						tweenTask.Add(scoreDisplayController.MoveTextUp(scoreChange));
-					}
-					else if (_oScore == 2)
-					{
-						_oScore += 1;
-						tweenTask.Add(scoreDisplayController.MoveTextUp(1));
-					}
-					else
-					{
-						throw new System.Exception($"Invalid _xScore detected: {_oScore}");
-					}
-				}
-				break;
-
-			case 3:
-				if (_currentSymbol == Symbol.X)
-				{
-					if (_xScore == 0)
-					{
-						_xScore += scoreChange;
-
-						tweenTask.Add(scoreDisplayController.HighlighAppear());
-						tweenTask.Add(scoreDisplayController.MoveTextUp(scoreChange));
-					}
-					else if (_xScore == 1)
-					{
-						_xScore += 2;
-
-						tweenTask.Add(scoreDisplayController.HighlighAppear());
-						tweenTask.Add(scoreDisplayController.MoveTextUp(2));
-					}
-					else if (_xScore == 2)
-					{
-						_xScore += 1;
-
-						tweenTask.Add(scoreDisplayController.MoveTextUp(1));
-					}
-					else
-					{
-						throw new System.Exception($"Invalid _xScore detected: {_xScore}");
-					}
-				}
-				else
-				{
-					if (_oScore == 0)
-					{
-						_oScore += scoreChange;
-
-						tweenTask.Add(scoreDisplayController.HighlighAppear());
-						tweenTask.Add(scoreDisplayController.MoveTextUp(scoreChange));
-					}
-					else if (_oScore == 1)
-					{
-						_oScore += 2;
-
-						tweenTask.Add(scoreDisplayController.HighlighAppear());
-						tweenTask.Add(scoreDisplayController.MoveTextUp(2));
-					}
-					else if (_oScore == 2)
-					{
-						_oScore += 1;
-
-						tweenTask.Add(scoreDisplayController.MoveTextUp(1));
-					}
-					else
-					{
-						throw new System.Exception($"Invalid _xScore detected: {_oScore}");
-					}
-				}
-				break;
-
-			default:
-				throw new System.Exception($"Unexpected scoreChange value detected: {scoreChange}");
+				tweenTask.Add(_scoreODisplayController.MoveTextUp(1));
+			}
+			else
+			{
+				throw new System.Exception($"Invalid _oScore detected: {_oScore}");
+			}
+		}
+		else
+		{
+			if (oScoreChange != 0)
+			{
+				throw new System.Exception($"Invalid oScoreChange: {oScoreChange}");
+			}
 		}
 
 		foreach (var task in tweenTask)
@@ -804,10 +794,10 @@ public class GameManager : MonoBehaviour
 		}
     }
 
-    async public Task MarkTile(TilePositionIndex index, Symbol symbol)
+    async public Task MarkTile(TilePositionIndex index, Symbol symbol, bool isWithSFX)
     {
 		_symbolDict[index] = symbol;
-		await _tileControllerDict[index].MarkSymbol(symbol);
+		await _tileControllerDict[index].MarkSymbol(symbol, isWithSFX);
 	}
 
 	async public Task ChangeSymbol()
@@ -830,8 +820,6 @@ public class GameManager : MonoBehaviour
 
 	public async Task ShowSuddenDeathHint()
 	{
-		Debug.Log($"ShowSuddenDeathHint called");
-
 		_suddenDeathBannerController.Show();
 		_confirmSuddenDeathBannerHintButtonController.Show();
 
@@ -892,6 +880,7 @@ public class GameManager : MonoBehaviour
 		foreach (var kvp in _tileControllerDict)
 		{
 			tasks.Add(kvp.Value.SymbolClear());
+			_clearSFX.Play();
 			_symbolDict[kvp.Key] = Symbol.None;
 		}
 
@@ -999,14 +988,6 @@ public class GameManager : MonoBehaviour
 			}
 		}
 	}
-
-	//public void ChangeState()
-	//{
-	//	_currentState = _gameStateDict[_currentState.NextStateKey];
-	//	_currentState.OnEnter();
-
-	//	Debug.Log($"{_currentState} called");
-	//}
 
 
 	public void SetAllTilesInteractable(bool value)

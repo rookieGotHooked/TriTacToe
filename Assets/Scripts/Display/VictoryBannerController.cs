@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,6 +16,9 @@ public class VictoryBannerController : MonoBehaviour
 	[SerializeField] float _delaySeconds;
 	[SerializeField] Sprite _symbolXSprite;
 	[SerializeField] Sprite _symbolOSprite;
+
+	[Header("SFX")]
+	[SerializeField] AudioSource _winSFX;
 
 	Image _yellowChevronLeftImageComponent;
 	Image _blackChevronRightImageComponent;
@@ -192,6 +194,8 @@ public class VictoryBannerController : MonoBehaviour
 			_blurLayerTween.ExecuteTweenOrders("Appear")
 		};
 
+		_winSFX.Play();
+
 		foreach (var task in tasks)
 		{
 			await task;
@@ -199,7 +203,8 @@ public class VictoryBannerController : MonoBehaviour
 
 		tasks.Clear();
 
-		await Task.Delay((int)(_delaySeconds * 1000));
+		//await Task.Delay((int)(_delaySeconds * 1000));
+		await DelayHelper.Delay(_delaySeconds);
 
 		tasks = new()
 		{

@@ -1,21 +1,26 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Device;
 
 public class ScreenManager: FSM_ScreensManager<ScreensEnum>
 {
 	#region Base Singleton
+	
 	protected static ScreenManager _instance;
 	public static ScreenManager Instance { get; private set; }
 
 	private GameMode _currentGameMode;
 	public GameMode CurrentGameMode => _currentGameMode;
 
+	private SoundController _soundController;
+	public SoundController SoundController => _soundController;
+
 	#endregion
+
 	protected override void Awake()
 	{
+		Application.targetFrameRate = 120;
+
 		if (Instance != null && Instance != this)
 		{
 			Destroy(this);
@@ -23,6 +28,7 @@ public class ScreenManager: FSM_ScreensManager<ScreensEnum>
 		}
 
 		Instance = this;
+
 
 		if (!TryGetComponent(out _soundController))
 		{

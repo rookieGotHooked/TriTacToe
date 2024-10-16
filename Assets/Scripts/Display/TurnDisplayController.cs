@@ -89,9 +89,6 @@ public class TurnDisplayController : MonoBehaviour
 		}
 
 		_tweenTasks.Clear();
-
-		//Debug.Log($"TurnDisplayController: {_currentSymbol}");
-		//Debug.Log($"GameManager: {GameManager.Instance.CurrentSymbol}");
 	}
 
 	async public Task MoveOut()

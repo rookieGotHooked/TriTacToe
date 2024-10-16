@@ -8,8 +8,8 @@ using UnityEngine.UI;
 public abstract class FSM_ScreensManager<EScreen>: MonoBehaviour where EScreen : Enum
 {
     #region Protected screen definitions and variables
-    protected SoundController _soundController;
-    public SoundController SoundController => _soundController;
+    //protected SoundController _soundController;
+    //public SoundController SoundController => _soundController;
 	protected BaseScreen<EScreen> _currentScreen;
 	protected EScreen _nextScreen;
     protected EScreen _previousScreen;
@@ -39,10 +39,10 @@ public abstract class FSM_ScreensManager<EScreen>: MonoBehaviour where EScreen :
 	{
         Application.targetFrameRate = 60;
 
-		if (!TryGetComponent(out _soundController))
-        {
-            throw new Exception($"{gameObject.name} does not contains SoundController component.");
-        }
+		//if (!TryGetComponent(out _soundController))
+  //      {
+  //          throw new Exception($"{gameObject.name} does not contains SoundController component.");
+  //      }
 
         PopuplateAssetDict();
         PopulateTransitionDict();

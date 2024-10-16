@@ -1,9 +1,6 @@
-using System.Collections;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using UnityEngine;
 using System;
-using Unity.VisualScripting;
 using System.Linq;
 //using System.Diagnostics;
 
@@ -741,13 +738,14 @@ public class AIActionState : BaseState<GameStates>
 
 	async public Task TileClick(TilePositionIndex index)
 	{
-		await Task.Delay(500);
+		//await Task.Delay(500);
+		await DelayHelper.Delay(0.5f);
 
 		if (_symbolDict[index] == Symbol.None)
 		{
 			//_gameManager.SetAllTilesInteractable(false);
 
-			await _gameManager.MarkTile(index, _gameManager.CurrentSymbol);
+			await _gameManager.MarkTile(index, _gameManager.CurrentSymbol, true);
 			_gameManager.LastMarkedTile = index;
 			OnExit();
 		}

@@ -1,154 +1,45 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class SoundController : MonoBehaviour
 {
-    List<AudioSource> _sfxSources = new();
-	List<AudioSource> _bgmSources = new();
-
     private float _sfxVolume;
-	public float SFXVolume => _sfxVolume;
 
-	private float _bgmVolume;
-	public float BGMVolume => _bgmVolume;
+	[SerializeField] OnSFXChangeEvent _SFXChangeEvent;
 
 	private void Awake()
 	{
-		GetAudioVolume(AudioType.SFX);
-		GetAudioVolume(AudioType.BGM);
+		_sfxVolume = GetAudioVolume();
 	}
 
-	public void SetAudioVolume(AudioType type, float value)
+	private void Start()
 	{
-		if (type == AudioType.SFX)
-		{
-			if (value <= 0)
-			{
-				_sfxVolume = 0f;
-			}
-			else if (value >= 1)
-			{
-				_sfxVolume = 1f;
-			}
-			else
-			{
-				_sfxVolume = value;
-			}
+		UpdateAudioVolume(_sfxVolume);
+	}
 
-			PlayerPrefs.SetFloat("TriTacToe_SFXVolume", value);
+	public float GetAudioVolume()
+	{
+		if (!PlayerPrefs.HasKey("TriTacToe_SFXVolume"))
+		{
+			PlayerPrefs.SetFloat("TriTacToe_SFXVolume", 1f);
+
+			return 1f;
 		}
 		else
 		{
-			if (value <= 0)
-			{
-				_bgmVolume = 0f;
-			}
-			else if (value >= 1)
-			{
-				_bgmVolume = 1f;
-			}
-			else
-			{
-				_bgmVolume = value;
-			}
-
-			PlayerPrefs.SetFloat("TriTacToe_BGMVolume", value);
+			return PlayerPrefs.GetFloat("TriTacToe_SFXVolume");
 		}
 	}
 
-	public void GetAudioVolume(AudioType type)
+	private void SetAudioVolume()
 	{
-		if (type == AudioType.SFX)
-		{
-			if (!PlayerPrefs.HasKey("TriTacToe_SFXVolume"))
-			{
-				_sfxVolume = 1f;
-
-				PlayerPrefs.SetFloat("TriTacToe_SFXVolume", _sfxVolume);
-			}
-			else
-			{
-				_sfxVolume = PlayerPrefs.GetFloat("TriTacToe_SFXVolume");
-			}
-		}
-		else
-		{
-			if (!PlayerPrefs.HasKey("TriTacToe_BGMVolume"))
-			{
-				_bgmVolume = 1f;
-
-				PlayerPrefs.SetFloat("TriTacToe_BGMVolume", _bgmVolume);
-			}
-			else
-			{
-				_bgmVolume = PlayerPrefs.GetFloat("TriTacToe_BGMVolume");
-			}
-		}
+		PlayerPrefs.SetFloat("TriTacToe_SFXVolume", _sfxVolume);
 	}
 
-	public void AddAudioSource(AudioType type, AudioSource audioSource)
+	public void UpdateAudioVolume(float value)
 	{
-		if (type == AudioType.SFX)
-		{
-			if (!_sfxSources.Contains(audioSource))
-			{
-				_sfxSources.Add(audioSource);
-			}
-		}
-		else
-		{
-			if (!_bgmSources.Contains(audioSource))
-			{
-				_bgmSources.Add(audioSource);
-			}
-		}
-	}
+		_SFXChangeEvent.Raise(new FloatWrapper(value));
+		_sfxVolume = value;
 
-	public void AddAudioSource(AudioType type, List<AudioSource> audioSources)
-	{
-		if (type == AudioType.SFX)
-		{
-			foreach (var source in audioSources)
-			{
-				if (!_sfxSources.Contains(source))
-				{
-					_sfxSources.Add(source);
-				}
-			}
-		}
-		else
-		{
-			foreach (var source in audioSources)
-			{
-				if (!_bgmSources.Contains(source))
-				{
-					_bgmSources.Add(source);
-				}
-			}
-		}
+		SetAudioVolume();
 	}
-
-	public void UpdateAllSourcesVolume(AudioType type)
-	{
-		if (type == AudioType.SFX)
-		{
-			foreach (var source in _sfxSources)
-			{
-				source.volume = _sfxVolume;
-			}
-		}
-		else
-		{
-			foreach (var source in _bgmSources)
-			{
-				source.volume = _bgmVolume;
-			}
-		}
-	}
-}
-
-public enum AudioType
-{
-	SFX, BGM
 }

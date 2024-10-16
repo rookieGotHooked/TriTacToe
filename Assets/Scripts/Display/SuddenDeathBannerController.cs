@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Data;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,10 +13,8 @@ public class SuddenDeathBannerController : MonoBehaviour
 	public SuddenDeathRule CurrentRule => _currentRule;
 
     private Image _imageComponent;
-    private Image _suddenDeathRule1ImageComponent;
-	private Image _suddenDeathRule2ImageComponent;
-	private Image _suddenDeathRule3ImageComponent;
-	private Image _suddenDeathRule4ImageComponent;
+    private Image _suddenDeathRule0ImageComponent;
+	private Image _suddenDeathRule1ImageComponent;
 
 
 	private void Awake()
@@ -42,19 +37,11 @@ public class SuddenDeathBannerController : MonoBehaviour
 
 		GameObject ruleAlignGameObject = transform.GetChild(0).gameObject;
 
-		if (!ruleAlignGameObject.transform.GetChild(0).gameObject.TryGetComponent(out _suddenDeathRule1ImageComponent))
+		if (!ruleAlignGameObject.transform.GetChild(0).gameObject.TryGetComponent(out _suddenDeathRule0ImageComponent))
 		{
 			throw new System.Exception($"{gameObject.name} does not contains Image component");
 		}
-		if (!ruleAlignGameObject.transform.GetChild(1).gameObject.TryGetComponent(out _suddenDeathRule2ImageComponent))
-		{
-			throw new System.Exception($"{gameObject.name} does not contains Image component");
-		}
-		if (!ruleAlignGameObject.transform.GetChild(2).gameObject.TryGetComponent(out _suddenDeathRule3ImageComponent))
-		{
-			throw new System.Exception($"{gameObject.name} does not contains Image component");
-		}
-		if (!ruleAlignGameObject.transform.GetChild(3).gameObject.TryGetComponent(out _suddenDeathRule4ImageComponent))
+		if (!ruleAlignGameObject.transform.GetChild(1).gameObject.TryGetComponent(out _suddenDeathRule1ImageComponent))
 		{
 			throw new System.Exception($"{gameObject.name} does not contains Image component");
 		}
@@ -65,75 +52,45 @@ public class SuddenDeathBannerController : MonoBehaviour
 		await _tweenComponent.ExecuteTweenOrders("Move Right To Left");
 	}
 
-	public void ShowRule1()
+	public void ShowRule0()
 	{
-		SetTransparency(_suddenDeathRule1ImageComponent, 255f);
-		SetTransparency(_suddenDeathRule2ImageComponent, 0f);
-		SetTransparency(_suddenDeathRule3ImageComponent, 0f);
-		SetTransparency(_suddenDeathRule4ImageComponent, 0f);
+		SetTransparency(_suddenDeathRule0ImageComponent, 255f);
+		SetTransparency(_suddenDeathRule1ImageComponent, 0f);
 	}
 
-	public void ShowRule2()
+	public void ShowRule1()
 	{
-		SetTransparency(_suddenDeathRule1ImageComponent, 0f);
-		SetTransparency(_suddenDeathRule2ImageComponent, 255f);
-		SetTransparency(_suddenDeathRule3ImageComponent, 0f);
-		SetTransparency(_suddenDeathRule4ImageComponent, 0f);
+		SetTransparency(_suddenDeathRule0ImageComponent, 0f);
+		SetTransparency(_suddenDeathRule1ImageComponent, 255f);
 
 		_currentRule = SuddenDeathRule.Rule1;
 	}
 
-	public void ShowRule3()
+	public void SetRule0()
 	{
-		SetTransparency(_suddenDeathRule1ImageComponent, 0f);
-		SetTransparency(_suddenDeathRule2ImageComponent, 0f);
-		SetTransparency(_suddenDeathRule3ImageComponent, 255f);
-		SetTransparency(_suddenDeathRule4ImageComponent, 0f);
+		_currentRule = SuddenDeathRule.Rule0;
 	}
-
-	public void ShowRule4()
-	{
-		SetTransparency(_suddenDeathRule1ImageComponent, 0f);
-		SetTransparency(_suddenDeathRule2ImageComponent, 0f);
-		SetTransparency(_suddenDeathRule3ImageComponent, 0f);
-		SetTransparency(_suddenDeathRule4ImageComponent, 255f);
-	}
-
-
 	public void SetRule1()
 	{
 		_currentRule = SuddenDeathRule.Rule1;
-	}
-	public void SetRule2()
-	{
-		_currentRule = SuddenDeathRule.Rule2;
-	}
-	public void SetRule3()
-	{
-		_currentRule = SuddenDeathRule.Rule3;
 	}
 
 	public void Hide()
 	{
 		SetTransparency(_imageComponent, 0f);
+		SetTransparency(_suddenDeathRule0ImageComponent, 0f);
 		SetTransparency(_suddenDeathRule1ImageComponent, 0f);
-		SetTransparency(_suddenDeathRule2ImageComponent, 0f);
-		SetTransparency(_suddenDeathRule3ImageComponent, 0f);
-		SetTransparency(_suddenDeathRule4ImageComponent, 0f);
 	}
 
 	public void AssignRule(SuddenDeathRule rule)
 	{
 		switch (rule)
 		{
+			case SuddenDeathRule.Rule0:
+				SetRule0(); 
+				break;
 			case SuddenDeathRule.Rule1:
-				SetRule1(); 
-				break;
-			case SuddenDeathRule.Rule2:
-				SetRule2();
-				break;
-			case SuddenDeathRule.Rule3:
-				SetRule3();
+				SetRule1();
 				break;
 			default:
 				throw new System.Exception($"Unexpected rule detected: {rule}");
@@ -146,14 +103,11 @@ public class SuddenDeathBannerController : MonoBehaviour
 
 		switch (_currentRule)
 		{
+			case SuddenDeathRule.Rule0:
+				ShowRule0();
+				break;
 			case SuddenDeathRule.Rule1:
 				ShowRule1();
-				break;
-			case SuddenDeathRule.Rule2:
-				ShowRule2();
-				break;
-			case SuddenDeathRule.Rule3:
-				ShowRule3();
 				break;
 			default:
 				throw new System.Exception($"Unexpected rule detected: {_currentRule}");
@@ -177,5 +131,5 @@ public class SuddenDeathBannerController : MonoBehaviour
 
 public enum SuddenDeathRule
 {
-	Rule1, Rule2, Rule3
+	Rule0, Rule1
 }

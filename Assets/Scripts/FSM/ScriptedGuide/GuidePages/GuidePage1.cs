@@ -1,8 +1,5 @@
-using System.Collections;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using UnityEngine;
-using Unity.VisualScripting;
 
 public class GuidePage1 : BaseGuidePage<GuidePageEnum>
 {
@@ -48,7 +45,8 @@ public class GuidePage1 : BaseGuidePage<GuidePageEnum>
 			await task;
 		}
 
-		await Task.Delay(500);
+		//await Task.Delay(500);
+		await DelayHelper.Delay(0.5f);
 
 		tweenHighlightSymbolTasks = new()
 		{
@@ -82,7 +80,8 @@ public class GuidePage1 : BaseGuidePage<GuidePageEnum>
 			await task;
 		}
 
-		await Task.Delay(500);
+		//await Task.Delay(500);
+		await DelayHelper.Delay(0.5f);
 
 		tweenHighlightSymbolTasks = new()
 		{

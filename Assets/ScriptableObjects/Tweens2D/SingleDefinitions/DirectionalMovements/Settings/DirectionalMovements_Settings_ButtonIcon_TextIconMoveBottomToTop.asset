@@ -12,8 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13a3dfa25cb0c1f45984f052ee0e4555, type: 3}
   m_Name: DirectionalMovements_Settings_ButtonIcon_TextIconMoveBottomToTop
   m_EditorClassIdentifier: 
-  tweenName: 
   tweenFormula: 13
-  duration: 0.5
+  duration: 0.25
   direction: 3
   movementValue: 100

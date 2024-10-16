@@ -1,9 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
-using System.Diagnostics;
 
 public class TurnFinalizeState : BaseState<GameStates>
 {
@@ -14,17 +12,18 @@ public class TurnFinalizeState : BaseState<GameStates>
 	private List<List<TilePositionIndex>> _diagonalsIndexes;
 	private Dictionary<TilePositionIndex, TileController> _tileControllerDict;
 
-	private int _scoreChange = 0;
+	private int _xScoreChange = 0;
+	private int _oScoreChange = 0;
 	private List<TilePositionIndex> _tileClearList = new();
 	public TurnFinalizeState(GameStates state) : base(state)
 	{
 	}
 
 	private bool _customRule = false;
-	private int _customRuleNumber = 2;
+	private int _customRuleNumber = 1;
 
 	private int _selectedSuddenDeathRule = 0;
-	private const int _suddenDeathLimit = 1;
+	private const int _suddenDeathLimit = 2;
 	private int _clearCount = 0;
 	private bool _suddenDeathRuleAssigned = false;
 
@@ -110,10 +109,6 @@ public class TurnFinalizeState : BaseState<GameStates>
 			_isInit = true;
 		}
 
-		//_lastMarkedTile = _gameManager.LastMarkedTile;
-
-		//Debug.Log($"Check _symbolDict: {_symbolDict.Equals(_gameManager.SymbolDict)}");
-
 		OnUpdate();
 	}
 
@@ -126,8 +121,6 @@ public class TurnFinalizeState : BaseState<GameStates>
 			_gameManager.IsGameEnd = true;
 		}
 
-		//await Task.Delay(500);
-
 		OnExit();
 	}
 
@@ -137,13 +130,14 @@ public class TurnFinalizeState : BaseState<GameStates>
 		GetTileClearListByColumns();
 		GetTileClearListByDiagonals();
 
-		if (_scoreChange > 0)
+		if (_xScoreChange > 0 || _oScoreChange > 0)
 		{
 			List<Task> tweenTasks = new();
 
 			foreach (var tileIndex in _tileClearList)
 			{
 				tweenTasks.Add(_tileControllerDict[tileIndex].HighlightAndClear());
+				_gameManager.ScoreSFX.Play();
 				_symbolDict[tileIndex] = Symbol.None;
 			}
 
@@ -152,7 +146,7 @@ public class TurnFinalizeState : BaseState<GameStates>
 				await task;
 			}
 
-			_gameManager.UpdateScore(_scoreChange);
+			_gameManager.UpdateScore(_xScoreChange, _oScoreChange);
 			_clearCount = 0;
 			_suddenDeathRuleAssigned = false;
 
@@ -192,21 +186,16 @@ public class TurnFinalizeState : BaseState<GameStates>
 		switch (_selectedSuddenDeathRule)
 		{
 			case 0:
-				await ExecuteSuddenDeathRule1();
+				await ExecuteSuddenDeathRule0();
 				break;
 			case 1:
-				await ExecuteSuddenDeathRule2();
-				break;
-			case 2:
-				await ExecuteSuddenDeathRule3();
+				await ExecuteSuddenDeathRule1();
 				break;
 			default:
 				throw new System.Exception($"Unexpected sudden death rule detected: {_selectedSuddenDeathRule}");
 		}
 
 		await CheckClearTiles(false);
-
-		await Task.Delay(1000);
 	}
 
 	async private Task AssignSuddenDeathRule()
@@ -219,19 +208,16 @@ public class TurnFinalizeState : BaseState<GameStates>
 		}
 		else
 		{
-			_selectedSuddenDeathRule = Random.Range(0, 3);
+			_selectedSuddenDeathRule = Random.Range(0, 2);
 		}
 
 		switch (_selectedSuddenDeathRule)
 		{
 			case 0:
-				_gameManager.SuddenDeathBannerController.SetRule1();
+				_gameManager.SuddenDeathBannerController.SetRule0();
 				break;
 			case 1:
-				_gameManager.SuddenDeathBannerController.SetRule2();
-				break;
-			case 2:
-				_gameManager.SuddenDeathBannerController.SetRule3();
+				_gameManager.SuddenDeathBannerController.SetRule1();
 				break;
 			default:
 				throw new System.Exception($"Invalid sudden death rule detected: {_selectedSuddenDeathRule}");
@@ -253,7 +239,8 @@ public class TurnFinalizeState : BaseState<GameStates>
 
 		tasks.Clear();
 
-		await Task.Delay(3000);
+		//await Task.Delay(2000);
+		await DelayHelper.Delay(2);
 
 		tasks.Add(_gameManager.GameplayBlurLayerTweenComponent.ExecuteTweenOrders("Disappear"));
 		tasks.Add(_gameManager.SuddenDeathBannerController.Move());
@@ -270,7 +257,7 @@ public class TurnFinalizeState : BaseState<GameStates>
 		_suddenDeathRuleAssigned = true;
 	}
 
-	async private Task ExecuteSuddenDeathRule1() // switch row to row, column to column
+	async private Task ExecuteSuddenDeathRule0() // switch row to row, column to column
 	{
 		List<Task> tasks = new();
 
@@ -325,7 +312,7 @@ public class TurnFinalizeState : BaseState<GameStates>
 		foreach (var kvp in newDict)
 		{
 			//Debug.Log($"kvp: {kvp.Key}, {kvp.Value}");
-			tasks.Add(_gameManager.MarkTile(kvp.Key, kvp.Value));
+			tasks.Add(_gameManager.MarkTile(kvp.Key, kvp.Value, false));
 		}
 
 		foreach (var task in tasks)
@@ -333,67 +320,11 @@ public class TurnFinalizeState : BaseState<GameStates>
 			await task;
 		}
 
-		await Task.Delay(2000);
+		//await Task.Delay(2000);
+		await DelayHelper.Delay(2);
 	}
 
-	async private Task ExecuteSuddenDeathRule2()
-	{
-		List<Task> tasks = new();
-
-		//Dictionary<TilePositionIndex, Symbol> newLine = new();
-
-		List<TilePositionIndex> listIndexes = new() { 
-			TilePositionIndex.Tile00, TilePositionIndex.Tile01, TilePositionIndex.Tile02,
-			TilePositionIndex.Tile10, TilePositionIndex.Tile11, TilePositionIndex.Tile12,
-			TilePositionIndex.Tile20, TilePositionIndex.Tile21, TilePositionIndex.Tile22,
-		};
-
-		Dictionary<TilePositionIndex, Symbol> oldDict = new();
-
-		foreach (var kvp in _symbolDict)
-		{
-			oldDict.Add(kvp.Key, kvp.Value);
-		}
-
-		foreach (var kvp in oldDict)
-		{
-			UnityEngine.Debug.Log($"kvp: {kvp.Key}, {kvp.Value}");
-		}
-
-		await _gameManager.ResetTiles();
-
-		foreach (var row in _rowsIndexes)
-		{
-			foreach (var index in row)
-			{
-				Dictionary<TilePositionIndex, Symbol> exclusionDict = new();
-
-				//Debug.Log($"exclusionDict.Count: {exclusionDict.Count}");
-
-				foreach (var kvp in oldDict)
-				{
-					if (kvp.Key != index)
-					{
-						exclusionDict.Add(kvp.Key, kvp.Value);
-					}
-				}
-
-				KeyValuePair<TilePositionIndex, Symbol> randomizedValue = exclusionDict.ElementAt(Random.Range(0, exclusionDict.Count));
-
-				tasks.Add(_gameManager.MarkTile(index, randomizedValue.Value));
-				oldDict.Remove(randomizedValue.Key);
-			}
-		}
-
-		foreach (var task in tasks)
-		{
-			await task;
-		}
-
-		await Task.Delay(2000);
-	}
-
-	async private Task ExecuteSuddenDeathRule3()
+	async private Task ExecuteSuddenDeathRule1()
 	{
 		List<TilePositionIndex> indexes = new();
 		List<TilePositionIndex> allIndexes = _symbolDict.Keys.ToList();
@@ -440,7 +371,18 @@ public class TurnFinalizeState : BaseState<GameStates>
 
 			if (toAdd)
 			{
-				_scoreChange++;
+				if (symbol == Symbol.X)
+				{
+					_xScoreChange++;
+				}
+				else if (symbol == Symbol.O)
+				{
+					_oScoreChange++;
+				}
+				else
+				{
+					throw new System.Exception($"Unexpected symbol: {symbol}");
+				}
 
 				foreach (var index in row)
 				{
@@ -484,7 +426,18 @@ public class TurnFinalizeState : BaseState<GameStates>
 
 			if (toAdd)
 			{
-				_scoreChange++;
+				if (symbol == Symbol.X)
+				{
+					_xScoreChange++;
+				}
+				else if (symbol == Symbol.O)
+				{
+					_oScoreChange++;
+				}
+				else
+				{
+					throw new System.Exception($"Unexpected symbol: {symbol}");
+				}
 
 				foreach (var index in col)
 				{
@@ -528,7 +481,18 @@ public class TurnFinalizeState : BaseState<GameStates>
 
 			if (toAdd)
 			{
-				_scoreChange++;
+				if (symbol == Symbol.X)
+				{
+					_xScoreChange++;
+				}
+				else if (symbol == Symbol.O)
+				{
+					_oScoreChange++;
+				}
+				else
+				{
+					throw new System.Exception($"Unexpected symbol: {symbol}");
+				}
 
 				foreach (var index in diag)
 				{
@@ -543,7 +507,8 @@ public class TurnFinalizeState : BaseState<GameStates>
 
 	async public override void OnExit()
 	{
-		_scoreChange = 0;
+		_xScoreChange = 0;
+		_oScoreChange = 0;
 		_tileClearList.Clear();
 
 		if (!_gameManager.IsGameEnd)

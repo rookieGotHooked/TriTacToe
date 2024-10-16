@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
@@ -43,7 +41,8 @@ public class TextboxButton : MonoBehaviour
 
         await _tweens2DComponent.ExecuteTweenOrders("Move In Appear");
 
-        await Task.Delay((int)(_textboxDisplayDuration * 1000f));
+        //await Task.Delay((int)(_textboxDisplayDuration * 1000f));
+        await DelayHelper.Delay(_textboxDisplayDuration);
 
 		await _tweens2DComponent.ExecuteTweenOrders("Move Out Disappear");
 

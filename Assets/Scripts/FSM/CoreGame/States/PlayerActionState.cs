@@ -1,7 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UnityEngine;
 
 public class PlayerActionState : BaseState<GameStates>
 {
@@ -37,7 +35,7 @@ public class PlayerActionState : BaseState<GameStates>
 		{
 			_gameManager.SetAllTilesInteractable(false);
 
-			await _gameManager.MarkTile(index, _gameManager.CurrentSymbol);
+			await _gameManager.MarkTile(index, _gameManager.CurrentSymbol, true);
 			_gameManager.LastMarkedTile = index;
 			OnExit();
 		}

@@ -23,11 +23,7 @@ MonoBehaviour:
     _objects:
     - _object: {fileID: 6848278730700176793, guid: c5f3a579a03c0d14dacfc258cfceaca7, type: 3}
       _type: 3
-    - _object: {fileID: 619184368039771025, guid: 441139bca29ca0946aaf9b52011a01e1, type: 3}
-      _type: 3
     - _object: {fileID: 3889594268742248076, guid: 68f820863972c0c43a6658a6c553428d, type: 3}
-      _type: 1
-    - _object: {fileID: 6072544216648142758, guid: 25edb06a9023ee147a3cd16db833ab00, type: 3}
       _type: 1
   - _groupName: Back Button
     _objects:

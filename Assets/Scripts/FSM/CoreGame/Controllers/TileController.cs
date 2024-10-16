@@ -1,7 +1,5 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,8 +16,6 @@ public class TileController : MonoBehaviour
 	[SerializeField] Sprite _oSprite;
 
 	[Header("SFX")]
-	[SerializeField] AudioSource _scoreSFX;
-	[SerializeField] AudioSource _clearSFX;
 	[SerializeField] AudioSource _xMarkSFX;
 	[SerializeField] AudioSource _oMarkSFX;
 
@@ -53,14 +49,6 @@ public class TileController : MonoBehaviour
 			throw new System.Exception($"{gameObject.name} does not contains Button component");
 		}
 
-		if (_scoreSFX == null) 
-		{
-			throw new System.Exception("Missing component: AudioSource; variable: _scoreSFX");
-		}
-		if (_clearSFX == null)
-		{
-			throw new System.Exception("Missing component: AudioSource; variable: _clearSFX");
-		}
 		if (_xMarkSFX == null)
 		{
 			throw new System.Exception("Missing component: AudioSource; variable: _xMarkSFX");
@@ -77,22 +65,28 @@ public class TileController : MonoBehaviour
 		await _playerActionState.TileClick(_tileIndex);
 	}
 
-	async public Task MarkSymbol(Symbol symbol)
+	async public Task MarkSymbol(Symbol symbol, bool isWithSFX)
 	{
-		//Debug.Log($"MarkSymbol: {symbol}");
-
 		switch (symbol)
 		{
 			case Symbol.X:
 				_symbolImage.sprite = _xSprite;
-				_xMarkSFX.Play();
+
+				if (isWithSFX)
+				{
+					_xMarkSFX.Play();
+				}
 				break;
 			case Symbol.O:
 				_symbolImage.sprite = _oSprite;
-				_oMarkSFX.Play();
+
+				if (isWithSFX)
+				{
+					_oMarkSFX.Play();
+				}
 				break;
 			default:
-				break;
+				throw new Exception($"Unexpected symbol: {symbol}, in {gameObject.name}");
 		}
 
 		await _symbolTween.ExecuteTweenOrders("Appear");
@@ -102,14 +96,14 @@ public class TileController : MonoBehaviour
 	{
 		await _highlightTween.ExecuteTweenOrders("Appear");
 
-		await Task.Delay(250);
+		//await Task.Delay(250);
+		await DelayHelper.Delay(0.25f);
 
 		List<Task> tweenTasks = new()
 		{
 			_highlightTween.ExecuteTweenOrders("Disappear"),
 			_symbolTween.ExecuteTweenOrders("Disappear")
 		};
-		_scoreSFX.Play();
 
 		foreach (var task in tweenTasks) 
 		{
@@ -119,10 +113,7 @@ public class TileController : MonoBehaviour
 
 	async public Task SymbolClear()
 	{
-		_clearSFX.Play();
 		await _symbolTween.ExecuteTweenOrders("Disappear");
-
-		//_buttonComponent.interactable = true;
 	}
 
 	public void SetInteractable(bool value)

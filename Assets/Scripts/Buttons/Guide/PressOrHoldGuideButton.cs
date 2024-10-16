@@ -1,11 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Threading.Tasks;
-using TMPro;
 
 public class PressOrHoldGuideButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {

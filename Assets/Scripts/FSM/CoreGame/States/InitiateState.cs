@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,7 +5,6 @@ using UnityEngine.UI;
 
 public class InitiateState : BaseState<GameStates>
 {
-	//GameManager _gameManager;
 	GameObject _screenObject;
 	GameMode _currentGameMode;
 
@@ -67,11 +65,6 @@ public class InitiateState : BaseState<GameStates>
 
 		OnUpdate();
 	}
-
-	//public override Task OnEnter()
-	//{
-
-	//}
 
 	public override async void OnUpdate()
 	{
@@ -358,7 +351,6 @@ public class InitiateState : BaseState<GameStates>
 	public override void OnExit()
 	{
 		_gameManager.SetAllTilesInteractable(true);
-		//_gameManager.ChangeState();
 
 		if (_currentGameMode == GameMode.Local)
 		{
