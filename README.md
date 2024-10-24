@@ -1,6 +1,6 @@
 # Tri-Tac-Toe!
 
-The tic-tac-toe game now comes with a twist! (made entirely for learning purposes)
+The tic-tac-toe game now comes with a twist! (made entirely for educational purposes)
 
 ## 1. Game rules:
 - Create a three-in-a-row of the same symbol to score a point. Any scored three-in-a-row will be clear off the board.
