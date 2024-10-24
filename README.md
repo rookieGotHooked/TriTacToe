@@ -42,8 +42,9 @@ https://www.figma.com/design/ziJJo5gkpCChhJkaQ2fLFW/TicTacToe?node-id=479-89&t=g
   + Tweaked UI sprite for smoother visual.
   + Clean up some of the un-used files.
   + Configured to build on Web (HTML5). The game is now on itch.io!
-  ```
-  
-  ```
 
-- Please contact me with this email if you have any questions: tlunguyendat@gmail.com
+```
+https://datnt621.itch.io/tri-tac-toe
+```
+
+Please contact me with this email if you have any questions: tlunguyendat@gmail.com
